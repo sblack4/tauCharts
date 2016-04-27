@@ -65,13 +65,18 @@ export class GPL extends Emitter {
             width: size.width,
             height: size.height
         };
-
-        xSvg.attr(attr);
+        Object.keys(attr).forEach((key)=>{
+            xSvg.attr(key,attr[key]);
+        })
+      
 
         xSvg.enter()
-            .append('svg')
-            .attr(attr)
-            .append('g')
+            .append('svg');
+
+         Object.keys(attr).forEach((key)=>{
+            xSvg.attr(key,attr[key]);
+        })   
+            xSvg.append('g')
             .attr('class', `${CSS_PREFIX}cell cell frame-root`);
 
         this.root.options = {

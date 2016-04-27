@@ -223,7 +223,7 @@ define(function (require) {
                 'Too long name for the ordinal axis 4'
             ];
 
-            var scale = d3.scale.ordinal().domain(domain).rangePoints([0, 100], 1);
+            var scale = d3.scaleOrdinal().domain(domain).rangePoints([0, 100], 1);
 
             var axis = d3.svg
                 .axis()

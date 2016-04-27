@@ -74,14 +74,14 @@ export class ColorScale extends BaseScale {
                 return defaultColorClass;
             } else {
                 var fullDomain = domain.map((x) => String(x).toString());
-                return d3.scale.ordinal().range(brewer).domain(fullDomain);
+                return d3.scaleOrdinal().range(brewer).domain(fullDomain);
             }
         };
 
         var buildObjectGetClass = (brewer, defaultGetClass) => {
             var domain = _.keys(brewer);
             var range = _.values(brewer);
-            var calculateClass = d3.scale.ordinal().range(range).domain(domain);
+            var calculateClass = d3.scaleOrdinal().range(range).domain(domain);
             return (d) => brewer.hasOwnProperty(d) ? calculateClass(d) : defaultGetClass(d);
         };
 

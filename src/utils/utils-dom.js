@@ -86,7 +86,7 @@ var utilsDom = {
 
         div.innerHTML = compiled({xTick: text});
 
-        var textNode = d3.select(div).selectAll('.x.axis .tick text')[0][0];
+        var textNode = d3.select(div).selectAll('.x.axis .tick text').node();
 
         var size = {
             width: 0,

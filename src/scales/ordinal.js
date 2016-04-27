@@ -16,7 +16,7 @@ export class OrdinalScale extends BaseScale {
         var props = this.scaleConfig;
         var varSet = this.vars;
 
-        var d3Domain = d3.scale.ordinal().domain(varSet);
+        var d3Domain = d3.scaleOrdinal().domain(varSet);
 
         var d3Scale = d3Domain.rangePoints(interval, 1);
 
