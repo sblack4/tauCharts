@@ -18,6 +18,7 @@ var getLayout = function () {
     var rightSidebarContainer = createElement('layout__sidebar-right', centerContainer);
     var rightSidebar = createElement('layout__sidebar-right__wrap', rightSidebarContainer);
     var footer = createElement('layout__footer', layout);
+    var logo = createElement('layout__logo', layout);
     /* jshint ignore:start */
     return {
         layout,
@@ -25,7 +26,8 @@ var getLayout = function () {
         content,
         leftSidebar,
         rightSidebar,
-        footer
+        footer,
+        logo
     };
     /* jshint ignore:end */
 };

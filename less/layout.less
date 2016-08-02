@@ -18,6 +18,7 @@
         height: 100%;
         width: 100%;
         overflow: auto;
+        position: relative;
         background: @layout-bg-color;
         color: @font-color;
 
@@ -57,7 +58,32 @@
             }
         }
 
-        text{
+        &__logo {
+            bottom: 1rem;
+            position: absolute;
+            right: 5rem;
+        }
+
+        .taucharts-link {
+            background-color: @taucharts-link-bg-color;
+            background-image: @taucharts-link-icon;
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            border: none;
+            border-radius: 0.125rem;
+            display: inline-block;
+            height: 0.625rem;
+            opacity: 0.3;
+            text-decoration: none;
+            transition: opacity 0.75s;
+            width: 6.375rem;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        text {
             fill: @font-color;
         }
     }

@@ -99,6 +99,8 @@ var api = {
 
         defaultClassBrewer: _.times(20, (i) => 'color20-' + (1 + i)),
 
+        logo: true,
+
         log: (msg, type) => {
             type = type || 'INFO';
             if (!Array.isArray(msg)) {

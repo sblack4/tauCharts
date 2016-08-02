@@ -8,7 +8,7 @@ import {scalesRegistry} from '../scales-registry';
 import {ScalesFactory} from '../scales-factory';
 import {DataProcessor} from '../data-processor';
 import WeakMap from 'core-js/library/fn/weak-map';
-import {getLayout} from '../utils/layuot-template';
+import {getLayout} from '../utils/layout-template';
 import {SpecConverter} from '../spec-converter';
 import {SpecTransformAutoLayout} from '../spec-transform-auto-layout';
 
@@ -202,6 +202,22 @@ export class Plot extends Emitter {
         return new Tooltip('', conf || {});
     }
 
+    setupLogo(logo) {
+        this._layout.logo.innerHTML = '';
+        if (logo) {
+            if (logo instanceof Node) {
+                this._layout.logo.appendChild(logo);
+            } else {
+                let a = document.createElement('a');
+                a.classList.add('taucharts-link');
+                a.href = 'https://www.taucharts.com/';
+                a.target = '_blank';
+                a.title = 'Taucharts.com';
+                this._layout.logo.appendChild(a);
+            }
+        }
+    }
+
     destroyNodes() {
         this._nodes.forEach((node) => node.destroy());
         this._nodes = [];
@@ -314,6 +330,8 @@ export class Plot extends Emitter {
             item.draw();
             this.onUnitDraw(item.node());
         });
+
+        this.setupLogo(this._liveSpec.settings.logo);
 
         this._svg = xSvg.node();
         this._layout.rightSidebar.style.maxHeight = (`${this._liveSpec.settings.size.height}px`);
