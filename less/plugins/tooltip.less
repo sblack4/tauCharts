@@ -129,13 +129,22 @@
     }
 
     &__tooltip {
-        &__groupby__value {
-            margin-left: 4px;
+        &__groupby {
+            &__field {
+                color: @font-gray-dark;
+            }
+
+            &__value {
+                margin-left: 4px;
+            }
         }
 
         &__table {
             display: table;
-            padding: 4px;
+
+            &__header {
+                color: @font-gray-dark;
+            }
 
             &__row, &__header {
                 display: table-row;
@@ -153,16 +162,36 @@
                 }
             }
 
-            &__cell, &__header__cell {
-                display: table-cell;
-                padding-bottom: 4px;
-                padding-right: 4px;
+            &__row__color {
+                text-align: center;
+                vertical-align: middle;
+            }
 
-                &:last-child {
-                    padding-bottom: 0;
-                    padding-right: 0;
-                }
+            &__cell,
+            &__row__color,
+            &__header__cell,
+            &__header__placeholder {
+                display: table-cell;
+                padding: 4px;
+            }
+
+            &__row__color {
+                border-radius: 50%;
+                display: inline-block;
+                height: 8px;
+                width: 8px;
             }
         }
     }
 }
+
+.generate-tooltip-colors(@n; @i: 1) when (@i =< @n) {
+
+    .graphical-report__tooltip__table__row__color.color@{n}-@{i} {
+        background: extract(@category-colors, @i);
+    }
+
+    .generate-tooltip-colors(@n; (@i + 1));
+}
+
+.generate-tooltip-colors(@list_category-colors);

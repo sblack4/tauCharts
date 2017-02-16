@@ -296,6 +296,7 @@
                 var fields = _fields.filter(function (f) {
                     return (f !== groupByField);
                 });
+                var model = self.state.highlight.unit.screenModel;
 
                 return [
                     self.groupByTemplate({
@@ -313,6 +314,8 @@
                             }),
                             data.map(function (d) {
                                 return self.rowTemplate({
+                                    color: model.color(d),
+                                    colorClass: model.class(d),
                                     cells: fields.map(function (f) {
                                         return self.cellTemplate({
                                             value: self._getFormat(f)(d[f]),
@@ -439,26 +442,32 @@
 
             headerTemplate: tpl([
                 '<div class="graphical-report__tooltip__table__header">',
+                '<span class="graphical-report__tooltip__table__header__placeholder"></span>',
                 '{{cells}}',
                 '</div>'
             ].join('')),
 
             headerCellTemplate: tpl([
-                '<div class="graphical-report__tooltip__table__header__cell">',
+                '<span class="graphical-report__tooltip__table__header__cell">',
                 '{{field}}',
-                '</div>'
+                '</span>'
             ].join('')),
 
             rowTemplate: tpl([
                 '<div class="graphical-report__tooltip__table__row">',
+                '<span class="graphical-report__tooltip__table__cell">',
+                '<span',
+                ' class="graphical-report__tooltip__table__row__color {{colorClass}}"',
+                ' style="background-color: {{color}};"></span>',
+                '</span>',
                 '{{cells}}',
                 '</div>'
             ].join('')),
 
             cellTemplate: tpl([
-                '<div class="graphical-report__tooltip__table__cell {{numericClass}}">',
+                '<span class="graphical-report__tooltip__table__cell {{numericClass}}">',
                 '{{value}}',
-                '</div>'
+                '</span>'
             ].join('')),
 
             _getFormatters: function () {
