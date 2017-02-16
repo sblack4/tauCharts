@@ -41,27 +41,6 @@
     // NOTE: Filter specs here.
     //
     function filterSpecs(allSpecs) {
-        // return [{
-        //     type: 'line',
-        //     x: 'x',
-        //     y: 'y',
-        //     size: 's',
-        //     color: 's',
-        //     data: [
-        //         // { x: 10, y: 20, s: 2000 },
-        //         // { x: 20, y: 10, s: 2005 },
-        //         // { x: 30, y: 40, s: 2010 },
-        //         // { x: 40, y: 20, s: 2015 }
-        //         // { x: 10, y: 20, s: 2000 },
-        //         // { x: 20, y: 10, s: 2001 },
-        //         // { x: 30, y: 40, s: 2005 },
-        //         // { x: 40, y: 20, s: 2005 }
-        //         {x:10, y: 20, s: 80004000},
-        //         {x:20, y: 10, s: 10003000},
-        //         {x:30, y: 40, s: 20000000},
-        //         {x:40, y: 20, s: 60002000}
-        //     ]
-        // }];
         return allSpecs;
     }
 
@@ -90,6 +69,7 @@
         'box-whiskers',
         'exportTo',
         'floating-axes',
+        'group-tooltip',
         'layers',
         'legend',
         'quick-filter',

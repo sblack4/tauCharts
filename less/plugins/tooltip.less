@@ -127,4 +127,42 @@
     &__tooltip-target &__bar&__highlighted {
         shape-rendering: crispEdges;
     }
+
+    &__tooltip {
+        &__groupby__value {
+            margin-left: 4px;
+        }
+
+        &__table {
+            display: table;
+            padding: 4px;
+
+            &__row, &__header {
+                display: table-row;
+            }
+
+            &__header__cell {
+                text-align: center;
+            }
+
+            &__cell {
+                text-align: left;
+
+                &-numeric {
+                    text-align: right;
+                }
+            }
+
+            &__cell, &__header__cell {
+                display: table-cell;
+                padding-bottom: 4px;
+                padding-right: 4px;
+
+                &:last-child {
+                    padding-bottom: 0;
+                    padding-right: 0;
+                }
+            }
+        }
+    }
 }

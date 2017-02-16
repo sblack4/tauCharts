@@ -262,8 +262,7 @@ export class Plot extends Emitter {
         const eventType = event.type;
         const isClick = (eventType === 'click');
         const dataEvent = (isClick ? 'data-click' : 'data-hover');
-        var data = null;
-        var node = null;
+        var closest = null;
         const items = this._getClosestElementPerUnit(x, y);
         const nonEmpty = items
             .filter((d) => d.closest)
@@ -277,19 +276,29 @@ export class Plot extends Emitter {
             ));
             const sameDistItems = (largerDistIndex < 0 ? nonEmpty : nonEmpty.slice(0, largerDistIndex));
             if (sameDistItems.length === 1) {
-                data = sameDistItems[0].closest.data;
-                node = sameDistItems[0].closest.node;
+                closest = sameDistItems[0].closest;
             } else {
                 const mx = (sameDistItems.reduce((sum, item) => sum + item.closest.x, 0) / sameDistItems.length);
                 const my = (sameDistItems.reduce((sum, item) => sum + item.closest.y, 0) / sameDistItems.length);
                 const angle = (Math.atan2(my - y, mx - x) + Math.PI);
-                const {closest} = sameDistItems[Math.round((sameDistItems.length - 1) * angle / 2 / Math.PI)];
-                data = closest.data;
-                node = closest.node;
+                closest = sameDistItems[Math.round((sameDistItems.length - 1) * angle / 2 / Math.PI)].closest;
             }
         }
 
-        items.forEach((item) => item.unit.fire(dataEvent, {event, data, node}));
+        items.forEach((item) => item.unit.fire(
+            dataEvent,
+            (closest ?
+                {
+                    event,
+                    data: this._liveSpec.settings.highlightGroups ? closest.siblings.map(s => s.data) : [closest.data],
+                    nodes: this._liveSpec.settings.highlightGroups ? closest.siblings.map(s => s.node) : [closest.node]
+                } :
+                {
+                    event,
+                    data: null,
+                    nodes: null
+                })
+        ));
     }
 
     _requestAnimationFrame(fn) {

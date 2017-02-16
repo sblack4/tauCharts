@@ -117,7 +117,7 @@ const Interval = {
 
     addInteraction() {
         const node = this.node();
-        const createFilter = ((data, falsy) => ((row) => row === data ? true : falsy));
+        const createFilter = ((data, falsy) => ((row) => data && data.indexOf(row) >= 0 ? true : falsy));
         node.on('highlight', (sender, filter) => this.highlight(filter));
         node.on('data-hover', ((sender, e) => this.highlight(createFilter(e.data, null))));
         node.on('data-click', ((sender, e) => this.highlight(createFilter(e.data, e.data ? false : null))));
@@ -453,7 +453,12 @@ const Interval = {
                 return {node: el.node, data: el.data, distance, secondaryDistance, x, y};
             });
 
-        return (closestElements[0] || null);
+        if (closestElements[0]) {
+            closestElements[0].siblings = closestElements;
+            return closestElements[0];
+        }
+
+        return null;
     },
 
     highlight(filter) {

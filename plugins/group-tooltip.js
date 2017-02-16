@@ -17,7 +17,11 @@
     var TARGET_SVG_CLASS = 'graphical-report__tooltip-target';
     var TARGET_STUCK_CLASS = 'graphical-report__tooltip-target-stuck';
 
-    function Tooltip(xSettings) {
+    var tpl = function (text) {
+        return utils.template(text, {interpolate: /\{\{([\s\S]+?)\}\}/g});
+    };
+
+    function GroupTooltip(xSettings) {
 
         var settings = utils.defaults(
             xSettings || {},
@@ -41,6 +45,7 @@
                 this._chart = chart;
                 this._metaInfo = {};
                 this._skipInfo = {};
+                this._chart.getSpec().settings.highlightGroups = true;
 
                 // NOTE: for compatibility with old Tooltip implementation.
                 Object.assign(this, utils.omit(settings, 'fields', 'getFields'));
@@ -57,7 +62,7 @@
                         ('')
                 );
 
-                var template = utils.template(this.template);
+                var template = tpl(this.template);
                 var tooltipNode = this.getTooltipNode();
 
                 this._tooltip
@@ -198,7 +203,7 @@
                         ||
                         ((typeof settings.getFields === 'function') && settings.getFields(this._chart))
                         ||
-                        Object.keys(data)
+                        Object.keys(data[0])
                     );
                     content.innerHTML = this.render(data, fields);
                 }
@@ -245,8 +250,8 @@
                         node.on('data-hover', function (sender, e) {
                             var bodyRect = document.body.getBoundingClientRect();
                             this.setState({
-                                highlight: (e.data && e.data[0] ? {
-                                    data: e.data[0],
+                                highlight: (e.data ? {
+                                    data: e.data,
                                     cursor: {
                                         x: (e.event.clientX - bodyRect.left),
                                         y: (e.event.clientY - bodyRect.top)
@@ -258,9 +263,9 @@
 
                         node.on('data-click', function (sender, e) {
                             var bodyRect = document.body.getBoundingClientRect();
-                            this.setState(e.data && e.data[0] ? {
+                            this.setState(e.data ? {
                                 highlight: {
-                                    data: e.data[0],
+                                    data: e.data,
                                     cursor: {
                                         x: (e.event.clientX - bodyRect.left),
                                         y: (e.event.clientY - bodyRect.top)
@@ -280,27 +285,47 @@
                 // for override
             },
 
-            render: function (data, fields) {
+            render: function (data, _fields) {
                 var self = this;
-                return fields
-                    .filter(function (k) {
-                        var tokens = k.split('.');
-                        var matchX = ((tokens.length === 2) && self._skipInfo[tokens[0]]);
-                        return !matchX;
-                    })
-                    .map(function (k) {
-                        var key = k;
-                        var val = data[k];
-                        return self.renderItem(self._getLabel(key), self._getFormat(key)(val), key, val);
-                    })
-                    .join('');
-            },
-
-            renderItem: function (label, formattedValue, fieldKey, fieldVal) {
-                return this.itemTemplate({
-                    label: label,
-                    value: formattedValue
+                // TODO: GroupBy field should be setup earlier.
+                var groupByField = _fields.find(function (f) {
+                    return data.every(function (d) {
+                        return (String(d[f]) === String(data[0][f]));
+                    });
                 });
+                var fields = _fields.filter(function (f) {
+                    return (f !== groupByField);
+                });
+
+                return [
+                    self.groupByTemplate({
+                        field: self._getLabel(groupByField),
+                        value: self._getFormat(groupByField)(data[0][groupByField])
+                    }),
+                    self.tableTemplate({
+                        rows: [
+                            self.headerTemplate({
+                                cells: fields.map(function (f) {
+                                    return self.headerCellTemplate({
+                                        field: self._getLabel(f)
+                                    });
+                                }).join('')
+                            }),
+                            data.map(function (d) {
+                                return self.rowTemplate({
+                                    cells: fields.map(function (f) {
+                                        return self.cellTemplate({
+                                            value: self._getFormat(f)(d[f]),
+                                            numericClass: (typeof d[f] !== 'number' ? '' :
+                                                'graphical-report__tooltip__table__cell-numeric'
+                                            )
+                                        });
+                                    }).join('')
+                                });
+                            }).join('')
+                        ].join('')
+                    })
+                ].join('');
             },
 
             _getFormat: function (k) {
@@ -395,14 +420,44 @@
 
             template: [
                 '<div class="i-role-content graphical-report__tooltip__content"></div>',
-                '<%= revealTemplate %>',
-                '<%= excludeTemplate %>'
+                '{{revealTemplate}}',
+                '{{excludeTemplate}}'
             ].join(''),
 
-            itemTemplate: utils.template([
-                '<div class="graphical-report__tooltip__list__item">',
-                '<div class="graphical-report__tooltip__list__elem"><%=label%></div>',
-                '<div class="graphical-report__tooltip__list__elem"><%=value%></div>',
+            groupByTemplate: tpl([
+                '<div class="graphical-report__tooltip__groupby">',
+                '<span class="graphical-report__tooltip__groupby__field">{{field}}</span>',
+                '<span class="graphical-report__tooltip__groupby__value">{{value}}</span>',
+                '</div>'
+            ].join('')),
+
+            tableTemplate: tpl([
+                '<div class="graphical-report__tooltip__table">',
+                '{{rows}}',
+                '</div>'
+            ].join('')),
+
+            headerTemplate: tpl([
+                '<div class="graphical-report__tooltip__table__header">',
+                '{{cells}}',
+                '</div>'
+            ].join('')),
+
+            headerCellTemplate: tpl([
+                '<div class="graphical-report__tooltip__table__header__cell">',
+                '{{field}}',
+                '</div>'
+            ].join('')),
+
+            rowTemplate: tpl([
+                '<div class="graphical-report__tooltip__table__row">',
+                '{{cells}}',
+                '</div>'
+            ].join('')),
+
+            cellTemplate: tpl([
+                '<div class="graphical-report__tooltip__table__cell {{numericClass}}">',
+                '{{value}}',
                 '</div>'
             ].join('')),
 
@@ -464,7 +519,7 @@
         return plugin;
     }
 
-    tauCharts.api.plugins.add('tooltip', Tooltip);
+    tauCharts.api.plugins.add('group-tooltip', GroupTooltip);
 
-    return Tooltip;
+    return GroupTooltip;
 });

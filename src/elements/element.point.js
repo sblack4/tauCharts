@@ -98,7 +98,7 @@ const Point = {
 
     addInteraction() {
         const node = this.node();
-        const createFilter = ((data, falsy) => ((row) => row === data ? true : falsy));
+        const createFilter = ((data, falsy) => ((row) => data && data.indexOf(row) >= 0 ? true : falsy));
         node.on('highlight', (sender, filter) => this.highlight(filter));
         node.on('data-hover', ((sender, e) => this.highlight(createFilter(e.data, null))));
         node.on('data-click', ((sender, e) => this.highlight(createFilter(e.data, e.data ? false : null))));
@@ -288,13 +288,18 @@ const Point = {
         ));
         const sameDistItems = (largerDistIndex < 0 ? items : items.slice(0, largerDistIndex));
         if (sameDistItems.length === 1) {
+            sameDistItems[0].siblings = items;
             return sameDistItems[0];
         }
         const mx = (sameDistItems.reduce((sum, item) => sum + item.x, 0) / sameDistItems.length);
         const my = (sameDistItems.reduce((sum, item) => sum + item.y, 0) / sameDistItems.length);
         const angle = (Math.atan2(my - cursorY, mx - cursorX) + Math.PI);
         const closest = sameDistItems[Math.round((sameDistItems.length - 1) * angle / 2 / Math.PI)];
-        return closest;
+        if (closest) {
+            closest.siblings = items;
+            return closest;
+        }
+        return null;
     },
 
     highlight(filter) {
