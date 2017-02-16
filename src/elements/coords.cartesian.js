@@ -485,4 +485,26 @@ export class Cartesian extends Element {
 
         return grid;
     }
+
+    addInteraction() {
+        const node = this.node();
+
+        node.on('data-hover', ((sender, e) => {
+            const {container} = node.config.options;
+            if (!e.data) {
+                container.select('.cursor-line').remove();
+                return;
+            }
+            const x = node.screenModel.xi(e.data[0]);
+            const yDomain = node.screenModel.scaleY.domain();
+            const y1 = node.screenModel.scaleY(yDomain[0]);
+            const y2 = node.screenModel.scaleY(yDomain[1]);
+            const line = selectOrAppend(container, 'line.cursor-line')
+                .attr('x1', x)
+                .attr('y1', y1)
+                .attr('x2', x)
+                .attr('y2', y2);
+            container.node().insertBefore(line.node(), container.node().firstElementChild);
+        }));
+    }
 }
