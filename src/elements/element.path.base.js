@@ -489,6 +489,7 @@ const BasePath = {
             })
             .classed(`${CSS_PREFIX}highlighted`, filter);
 
+        const flip = unit.config.flip;
         const highlighted = dots.filter(filter);
         var cursorLine = container.select('.cursor-line');
         if (highlighted.empty()) {
@@ -497,16 +498,18 @@ const BasePath = {
             if (cursorLine.empty()) {
                 cursorLine = container.insert('line', ':first-child');
             }
-            const x = unit.screenModel.model.xi(highlighted.data()[0]);
-            const yDomain = unit.screenModel.model.scaleY.domain();
-            const y1 = unit.screenModel.model.scaleY(yDomain[0]);
-            const y2 = unit.screenModel.model.scaleY(yDomain[1]);
+            const model = unit.screenModel.model;
+            const x1 = model.xi(highlighted.data()[0]);
+            const x2 = model.xi(highlighted.data()[0]);
+            const domain = model.scaleY.domain();
+            const y1 = model.scaleY(domain[0]);
+            const y2 = model.scaleY(domain[1]);
             cursorLine
                 .attr('class', 'cursor-line')
-                .attr('x1', x)
-                .attr('y1', y1)
-                .attr('x2', x)
-                .attr('y2', y2);
+                .attr('x1', flip ? y1 : x1)
+                .attr('y1', flip ? x1 : y1)
+                .attr('x2', flip ? y2 : x2)
+                .attr('y2', flip ? x2 : y2);
         }
 
         utilsDraw.raiseElements(container, '.i-role-path', (fiber) => {
