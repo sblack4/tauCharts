@@ -467,8 +467,9 @@ const BasePath = {
         const showOnHover = this.node().config.guide.showAnchors === 'hover';
         const rmin = 4; // Min highlight radius
         const rx = 1.25; // Highlight multiplier
-        const container = this.node().config.options.container;
-        container
+        const unit = this.node();
+        const container = unit.config.options.container;
+        const dots = container
             .selectAll(`.${cssClass}`)
             .attr({
                 r: (showOnHover ?
@@ -487,6 +488,26 @@ const BasePath = {
                 class: (d) => utilsDom.classes(cssClass, screenModel.class(d))
             })
             .classed(`${CSS_PREFIX}highlighted`, filter);
+
+        const highlighted = dots.filter(filter);
+        var cursorLine = container.select('.cursor-line');
+        if (highlighted.empty()) {
+            cursorLine.remove();
+        } else {
+            if (cursorLine.empty()) {
+                cursorLine = container.insert('line', ':first-child');
+            }
+            const x = unit.screenModel.model.xi(highlighted.data()[0]);
+            const yDomain = unit.screenModel.model.scaleY.domain();
+            const y1 = unit.screenModel.model.scaleY(yDomain[0]);
+            const y2 = unit.screenModel.model.scaleY(yDomain[1]);
+            cursorLine
+                .attr('class', 'cursor-line')
+                .attr('x1', x)
+                .attr('y1', y1)
+                .attr('x2', x)
+                .attr('y2', y2);
+        }
 
         utilsDraw.raiseElements(container, '.i-role-path', (fiber) => {
             return fiber
