@@ -285,17 +285,20 @@ export class Plot extends Emitter {
             }
         }
 
+        var highlightMultiple = this._liveSpec.unit.guide.highlightMultiple;
         items.forEach((item) => item.unit.fire(
             dataEvent,
             (closest ?
                 {
                     event,
-                    data: this._liveSpec.settings.highlightGroups ? closest.siblings.map(s => s.data) : [closest.data],
-                    nodes: this._liveSpec.settings.highlightGroups ? closest.siblings.map(s => s.node) : [closest.node]
+                    data: highlightMultiple ? closest.siblings.map(s => s.data) : [closest.data],
+                    groupDim: highlightMultiple ? closest.siblingsDim : null,
+                    nodes: highlightMultiple ? closest.siblings.map(s => s.node) : [closest.node]
                 } :
                 {
                     event,
                     data: null,
+                    groupDim: null,
                     nodes: null
                 })
         ));

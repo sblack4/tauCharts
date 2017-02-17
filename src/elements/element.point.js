@@ -289,6 +289,7 @@ const Point = {
         const sameDistItems = (largerDistIndex < 0 ? items : items.slice(0, largerDistIndex));
         if (sameDistItems.length === 1) {
             sameDistItems[0].siblings = items;
+            sameDistItems[0].siblingsDim = null;
             return sameDistItems[0];
         }
         const mx = (sameDistItems.reduce((sum, item) => sum + item.x, 0) / sameDistItems.length);
@@ -297,6 +298,7 @@ const Point = {
         const closest = sameDistItems[Math.round((sameDistItems.length - 1) * angle / 2 / Math.PI)];
         if (closest) {
             closest.siblings = items;
+            closest.siblingsDim = null;
             return closest;
         }
         return null;

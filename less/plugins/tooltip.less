@@ -27,6 +27,19 @@
             transition-duration: 500ms;
         }
 
+        &.top-right,
+        &.bottom-right {
+            margin-left: 8px;
+        }
+        &.top-left,
+        &.bottom-left {
+            margin-left: -8px;
+        }
+        &.top-right,
+        &.top-left {
+            margin-top: 8px;
+        }
+
         &__content {
             max-width: 500px;
             overflow: hidden;
@@ -130,8 +143,12 @@
 
     &__tooltip {
         &__groupby {
+            margin-bottom: 4px;
+            margin-left: 4px;
+
             &__field {
                 color: @font-gray-dark;
+                text-transform: capitalize;
             }
 
             &__value {
@@ -139,15 +156,30 @@
             }
         }
 
+        &__table-wrapper {
+            overflow-y: hidden;
+        }
+
         &__table {
             display: table;
 
             &__header {
                 color: @font-gray-dark;
+                text-transform: capitalize;
+            }
+
+            &__row {
+                &:hover {
+                    background: mix(@font-color, @bg-color, 5%);
+                }
             }
 
             &__row, &__header {
                 display: table-row;
+            }
+
+            &__row-limited {
+                display: none;
             }
 
             &__header__cell {
@@ -173,6 +205,7 @@
             &__header__placeholder {
                 display: table-cell;
                 padding: 4px;
+                vertical-align: middle;
             }
 
             &__row__color {
@@ -182,11 +215,29 @@
                 width: 8px;
             }
         }
+
+        &__limit {
+            color: @font-gray-dark;
+            text-align: center;
+        }
+
+        &.stuck &__table-wrapper {
+            max-height: 215px;
+            overflow-y: auto;
+        }
+
+        &.stuck &__table__row-limited {
+            display: table-row;
+        }
+
+        &.stuck &__limit {
+            display: none;
+        }
     }
     
     &__svg .grid .cursor-line {
         shape-rendering: crispEdges;
-        stroke: mix(@font-color, @bg-color, 50%);
+        stroke: mix(@font-color, @bg-color, 25%);
         stroke-width: 1px;
     }
 }

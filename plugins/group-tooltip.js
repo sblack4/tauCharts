@@ -30,6 +30,7 @@
                 fields: null,
                 formatters: {},
                 dockToData: false,
+                recordsLimit: 8,
                 aggregationGroupFields: [],
                 onRevealAggregation: function (filters, row) {
                     console.log(
@@ -45,7 +46,7 @@
                 this._chart = chart;
                 this._metaInfo = {};
                 this._skipInfo = {};
-                this._chart.getSpec().settings.highlightGroups = true;
+                this._chart.getSpec().unit.guide.highlightMultiple = true;
 
                 // NOTE: for compatibility with old Tooltip implementation.
                 Object.assign(this, utils.omit(settings, 'fields', 'getFields'));
@@ -67,8 +68,8 @@
 
                 this._tooltip
                     .content(template({
-                        revealTemplate: revealAggregationBtn,
-                        excludeTemplate: this.templateExclude
+                        revealTemplate: '',//revealAggregationBtn,
+                        excludeTemplate: ''//this.templateExclude
                     }));
 
                 tooltipNode
@@ -98,7 +99,10 @@
 
                     }.bind(this), false);
 
-                this._scrollHandler = function () {
+                this._scrollHandler = function (e) {
+                    if (e.target.matches('.graphical-report__tooltip__table-wrapper')) {
+                        return;
+                    }
                     this.setState({
                         highlight: null,
                         isStuck: false
@@ -138,8 +142,8 @@
             setState: function (newState) {
                 var prev = this.state;
                 var state = this.state = Object.assign({}, prev, newState);
-                prev.highlight = prev.highlight || {data: null, cursor: null, unit: null};
-                state.highlight = state.highlight || {data: null, cursor: null, unit: null};
+                prev.highlight = prev.highlight || {data: null, groupDim: null, cursor: null, unit: null};
+                state.highlight = state.highlight || {data: null, groupDim: null, cursor: null, unit: null};
 
                 // If stuck, treat that data has not changed
                 if (state.isStuck && prev.highlight.data) {
@@ -152,7 +156,8 @@
                         this.hideTooltip();
                         this.showTooltip(
                             state.highlight.data,
-                            state.highlight.cursor
+                            state.highlight.cursor,
+                            state.highlight.groupDim
                         );
                         this._setTargetSvgClass(true);
                         requestAnimationFrame(function () {
@@ -194,7 +199,7 @@
                 }
             },
 
-            showTooltip: function (data, cursor) {
+            showTooltip: function (data, cursor, groupByField) {
 
                 var content = this.getTooltipNode().querySelectorAll('.i-role-content')[0];
                 if (content) {
@@ -205,7 +210,7 @@
                         ||
                         Object.keys(data[0])
                     );
-                    content.innerHTML = this.render(data, fields);
+                    content.innerHTML = this.render(data, fields, groupByField);
                 }
 
                 this._tooltip
@@ -252,6 +257,7 @@
                             this.setState({
                                 highlight: (e.data ? {
                                     data: e.data,
+                                    groupDim: e.groupDim,
                                     cursor: {
                                         x: (e.event.clientX - bodyRect.left),
                                         y: (e.event.clientY - bodyRect.top)
@@ -266,6 +272,7 @@
                             this.setState(e.data ? {
                                 highlight: {
                                     data: e.data,
+                                    groupDim: e.groupDim,
                                     cursor: {
                                         x: (e.event.clientX - bodyRect.left),
                                         y: (e.event.clientY - bodyRect.top)
@@ -285,24 +292,26 @@
                 // for override
             },
 
-            render: function (data, _fields) {
+            render: function (_data, _fields, groupByField) {
                 var self = this;
-                // TODO: GroupBy field should be setup earlier.
-                var groupByField = _fields.find(function (f) {
-                    return data.every(function (d) {
-                        return (String(d[f]) === String(data[0][f]));
-                    });
-                });
                 var fields = _fields.filter(function (f) {
                     return (f !== groupByField);
                 });
                 var model = self.state.highlight.unit.screenModel;
+                var isLimited = (_data.length > settings.recordsLimit);
+                var data = _data.slice(0).sort(function (a, b) {
+                    var dx = (model.x(a) - model.x(b));
+                    if (dx === 0) {
+                        return (model.y(a) - model.y(b));
+                    }
+                    return dx;
+                });
 
                 return [
-                    self.groupByTemplate({
+                    (groupByField ? self.groupByTemplate({
                         field: self._getLabel(groupByField),
                         value: self._getFormat(groupByField)(data[0][groupByField])
-                    }),
+                    }) : ''),
                     self.tableTemplate({
                         rows: [
                             self.headerTemplate({
@@ -312,10 +321,13 @@
                                     });
                                 }).join('')
                             }),
-                            data.map(function (d) {
+                            data.map(function (d, i) {
                                 return self.rowTemplate({
                                     color: model.color(d),
                                     colorClass: model.class(d),
+                                    limitedClass: (i < settings.recordsLimit ? '' :
+                                        'graphical-report__tooltip__table__row-limited'
+                                    ),
                                     cells: fields.map(function (f) {
                                         return self.cellTemplate({
                                             value: self._getFormat(f)(d[f]),
@@ -327,7 +339,10 @@
                                 });
                             }).join('')
                         ].join('')
-                    })
+                    }),
+                    isLimited ? self.limitTemplate({
+                        text: '...'
+                    }) : '',
                 ].join('');
             },
 
@@ -435,8 +450,10 @@
             ].join('')),
 
             tableTemplate: tpl([
+                '<div class="graphical-report__tooltip__table-wrapper">',
                 '<div class="graphical-report__tooltip__table">',
                 '{{rows}}',
+                '</div>',
                 '</div>'
             ].join('')),
 
@@ -454,7 +471,7 @@
             ].join('')),
 
             rowTemplate: tpl([
-                '<div class="graphical-report__tooltip__table__row">',
+                '<div class="graphical-report__tooltip__table__row {{limitedClass}}">',
                 '<span class="graphical-report__tooltip__table__cell">',
                 '<span',
                 ' class="graphical-report__tooltip__table__row__color {{colorClass}}"',
@@ -467,6 +484,12 @@
             cellTemplate: tpl([
                 '<span class="graphical-report__tooltip__table__cell {{numericClass}}">',
                 '{{value}}',
+                '</span>'
+            ].join('')),
+
+            limitTemplate: tpl([
+                '<div class="graphical-report__tooltip__limit">',
+                '{{text}}',
                 '</span>'
             ].join('')),
 

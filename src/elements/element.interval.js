@@ -455,6 +455,7 @@ const Interval = {
 
         if (closestElements[0]) {
             closestElements[0].siblings = closestElements;
+            closestElements[0].siblingsDim = this.node().screenModel.model.scaleX.dim;
             return closestElements[0];
         }
 

@@ -374,10 +374,11 @@ const BasePath = {
             return null;
         }
         const {bounds, tree} = this._boundsInfo;
-        const container = this.node().config.options.container;
-        const {flip} = this.node().config;
+        const unit = this.node();
+        const container = unit.config.options.container;
+        const {flip} = unit.config;
         const translate = utilsDraw.getDeepTransformTranslate(container.node());
-        const {maxHighlightDistance} = this.node().config.guide;
+        const {maxHighlightDistance} = unit.config.guide;
         if ((cursorX < bounds.left + translate.x - maxHighlightDistance) ||
             (cursorX > bounds.right + translate.x + maxHighlightDistance) ||
             (cursorY < bounds.top + translate.y - maxHighlightDistance) ||
@@ -412,6 +413,7 @@ const BasePath = {
         const sameDistItems = (largerDistIndex < 0 ? items : items.slice(0, largerDistIndex));
         if (sameDistItems.length === 1) {
             sameDistItems[0].siblings = items;
+            sameDistItems[0].siblingsDim = unit.screenModel.model.scaleX.dim;
             return sameDistItems[0];
         }
         const mx = (sameDistItems.reduce((sum, item) => sum + item.x, 0) / sameDistItems.length);
@@ -420,6 +422,7 @@ const BasePath = {
         const closest = sameDistItems[Math.round((sameDistItems.length - 1) * angle / 2 / Math.PI)];
         if (closest) {
             closest.siblings = items;
+            closest.siblingsDim = unit.screenModel.model.scaleX.dim;
             return closest;
         }
         return null;

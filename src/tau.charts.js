@@ -97,7 +97,6 @@ var api = {
         asyncRendering: false,
         syncRenderingDuration: 50,
         syncPointerEvents: false,
-        highlightGroups: false,
 
         defaultNiceColor: true,
 
