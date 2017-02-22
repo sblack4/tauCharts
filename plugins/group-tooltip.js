@@ -79,7 +79,7 @@
 
                         while (target !== e.currentTarget && target !== null) {
                             if (target.classList.contains('i-role-exclude')) {
-                                this._exclude();
+                                this._exclude(target.dataset.id);
                                 this.setState({
                                     highlight: null,
                                     isStuck: false
@@ -323,6 +323,7 @@
                             }),
                             data.map(function (d, i) {
                                 return self.rowTemplate({
+                                    rowId: model.id(d),
                                     color: model.color(d),
                                     colorClass: model.class(d),
                                     limitedClass: (i < settings.recordsLimit ? '' :
@@ -384,15 +385,17 @@
                 settings.onRevealAggregation(descFilters, aggregatedRow);
             },
 
-            _exclude: function () {
+            _exclude: function (targetId) {
+                var model = this.state.highlight.unit.screenModel;
+                var targetRow = this.state.highlight.data.find(function (row) {
+                    return (String(model.id(row)) === targetId);
+                });
                 this._chart
                     .addFilter({
                         tag: 'exclude',
-                        predicate: (function (element) {
-                            return function (row) {
-                                return JSON.stringify(row) !== JSON.stringify(element);
-                            };
-                        }(this.state.highlight.data))
+                        predicate: function (row) {
+                            return (row !== targetRow);
+                        }
                     });
                 this._chart.refresh();
             },
@@ -478,6 +481,11 @@
                 ' style="background-color: {{color}};"></span>',
                 '</span>',
                 '{{cells}}',
+                '<span class="graphical-report__tooltip__table__row__actions">',
+                '<span class="graphical-report__tooltip__exclude i-role-exclude" data-id={{rowId}}>',
+                '<span class="tau-icon-close-gray"></span> Exclude',
+                '</span>',
+                '</span>',
                 '</div>'
             ].join('')),
 

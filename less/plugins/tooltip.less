@@ -233,6 +233,16 @@
         &.stuck &__limit {
             display: none;
         }
+
+        &__table &__exclude {
+            display: none;
+        }
+
+        &.stuck &__table &__exclude {
+            display: inline;
+            height: 17px;
+            width: 48px;
+        }
     }
     
     &__svg .grid .cursor-line {
