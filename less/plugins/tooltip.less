@@ -156,6 +156,10 @@
             }
         }
 
+        &__table-wrapper {
+            margin-bottom: 8px;
+        }
+
         &__table {
             display: flex;
             flex-direction: column;
@@ -169,7 +173,23 @@
             &__rows-group {
                 max-height: 200px;
                 overflow-x: hidden;
-                overflow-y: auto;
+                overflow-y: hidden;
+                position: relative;
+
+                &-overflow::after {
+                    align-items: flex-end;
+                    background-image: linear-gradient(fadeout(@bg-color, 100%), @bg-color);
+                    bottom: 0;
+                    color: @font-gray-dark;
+                    content: "...";
+                    display: flex;
+                    height: 32px;
+                    justify-content: center;
+                    left: 0;
+                    position: absolute;
+                    text-align: center;
+                    width: 100%;
+                }
             }
 
             &__row {
@@ -224,13 +244,8 @@
             }
         }
 
-        &__limit {
-            color: @font-gray-dark;
-            text-align: center;
-        }
-
-        &.stuck &__limit {
-            opacity: 0;
+        &.stuck &__table__rows-group {
+            overflow-y: auto;
         }
 
         &__table &__exclude {

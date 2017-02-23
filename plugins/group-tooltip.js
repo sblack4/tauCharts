@@ -16,6 +16,9 @@
     var pluginsSDK = tauCharts.api.pluginsSDK;
     var TARGET_SVG_CLASS = 'graphical-report__tooltip-target';
     var TARGET_STUCK_CLASS = 'graphical-report__tooltip-target-stuck';
+    var TABLE_HEADER_CLASS = 'graphical-report__tooltip__table__header';
+    var TABLE_ROWS_GROUP_CLASS = 'graphical-report__tooltip__table__rows-group';
+    var TABLE_ROWS_GROUP_OVERFLOW_CLASS = 'graphical-report__tooltip__table__rows-group-overflow';
 
     var tpl = function (text) {
         return utils.template(text, {interpolate: /\{\{([\s\S]+?)\}\}/g});
@@ -30,7 +33,6 @@
                 fields: null,
                 formatters: {},
                 dockToData: false,
-                recordsLimit: 8,
                 aggregationGroupFields: [],
                 onRevealAggregation: function (filters, row) {
                     console.log(
@@ -197,6 +199,26 @@
                         }.bind(this));
                     }
                 }
+
+                // Fix jumping width caused by scrollbar
+                if (state.highlight.data) {
+                    var headerNode = tooltipNode.querySelector('.' + TABLE_HEADER_CLASS);
+                    var rowsNode = tooltipNode.querySelector('.' + TABLE_ROWS_GROUP_CLASS);
+                    var hasOverflow = (rowsNode.scrollHeight > rowsNode.clientHeight);
+                    var scrollSize = tauCharts.api.globalSettings.getScrollbarSize(rowsNode);
+                    if (state.isStuck) {
+                        rowsNode.classList.remove(TABLE_ROWS_GROUP_OVERFLOW_CLASS);
+                        rowsNode.style.paddingRight = null;
+                    } else {
+                        if (hasOverflow) {
+                            rowsNode.classList.add(TABLE_ROWS_GROUP_OVERFLOW_CLASS);
+                        } else {
+                            rowsNode.classList.remove(TABLE_ROWS_GROUP_OVERFLOW_CLASS);
+                        }
+                        headerNode.style.paddingRight = (hasOverflow ? scrollSize.width + 'px' : null);
+                        rowsNode.style.paddingRight = (hasOverflow ? scrollSize.width + 'px' : null);
+                    }
+                }
             },
 
             showTooltip: function (data, cursor, groupByField) {
@@ -298,7 +320,6 @@
                     return (f !== groupByField);
                 });
                 var model = self.state.highlight.unit.screenModel;
-                var isLimited = (_data.length > settings.recordsLimit);
                 var data = _data.slice(0).sort(function (a, b) {
                     var dx = (model.x(a) - model.x(b));
                     if (dx === 0) {
@@ -331,9 +352,6 @@
                                 rowId: model.id(d),
                                 color: model.color(d),
                                 colorClass: model.class(d),
-                                limitedClass: (i < settings.recordsLimit ? '' :
-                                    'graphical-report__tooltip__table__row-limited'
-                                ),
                                 cells: fields.map(function (f) {
                                     return self.cellTemplate({
                                         value: self._getFormat(f)(d[f]),
@@ -345,10 +363,7 @@
                                 }).join('')
                             });
                         }).join('')
-                    }),
-                    isLimited ? self.limitTemplate({
-                        text: '...'
-                    }) : '',
+                    })
                 ].join('');
             },
 
@@ -498,7 +513,7 @@
             ].join('')),
 
             rowTemplate: tpl([
-                '<div class="graphical-report__tooltip__table__row {{limitedClass}}">',
+                '<div class="graphical-report__tooltip__table__row">',
                 '<div class="graphical-report__tooltip__table__cell',
                 ' graphical-report__tooltip__table__col-small">',
                 '<span',
@@ -524,12 +539,6 @@
                 '{{value}}',
                 '</span>',
                 '</div>'
-            ].join('')),
-
-            limitTemplate: tpl([
-                '<div class="graphical-report__tooltip__limit">',
-                '{{text}}',
-                '</span>'
             ].join('')),
 
             _getFormatters: function () {
