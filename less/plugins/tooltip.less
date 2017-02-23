@@ -156,38 +156,85 @@
             }
         }
 
-        &__table-wrapper {
+        &__table__rows-group {
+            max-height: 215px;
             overflow-y: hidden;
+        }
+
+        &__table-wrapper-fixed {
+            position: relative;
+        }
+
+        &__table-wrapper {
+            max-height: 200px;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         &__table {
             display: table;
+            width: 100%;
 
             &__header {
                 color: @font-gray-dark;
+                display: table-header-group;
                 text-transform: capitalize;
-            }
 
-            &__row {
-                &:hover {
-                    background: mix(@font-color, @bg-color, 5%);
+                &__cell {
+                    text-align: center;
+
+                    &__value {
+                        color: transparent;
+
+                        &-fixed {
+                            background-color: @bg-color;
+                            color: @font-gray-dark;
+                            padding: 4px;
+                            position: absolute;
+                            top: 0;
+                        }
+                    }
+                }
+
+                &__placeholder-fixed {
+                    width: 12px;
                 }
             }
 
-            &__row, &__header {
+            &__rows-group {
+                display: table-row-group;
+            }
+
+            &__row {
+                box-sizing: border-box;
                 display: table-row;
-            }
 
-            &__row-limited {
-                display: none;
-            }
+                &:hover {
+                    background: mix(@font-color, @bg-color, 5%);
+                }
 
-            &__header__cell {
-                text-align: center;
+                // &-limited {
+                //     height: 0;
+                //     overflow: hidden;
+                // }
             }
 
             &__cell {
+                align-items: center;
+                box-sizing: border-box;
+                flex: 1 1;
+                flex-direction: column;
+                display: table-cell;
+                justify-content: center;
+                padding: 4px;
                 text-align: left;
+
+                &__value {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    width: 100%;
+                }
 
                 &-numeric {
                     text-align: right;
@@ -195,24 +242,15 @@
             }
 
             &__row__color {
-                text-align: center;
-                vertical-align: middle;
-            }
-
-            &__cell,
-            &__row__color,
-            &__header__cell,
-            &__header__placeholder {
-                display: table-cell;
-                padding: 4px;
-                vertical-align: middle;
-            }
-
-            &__row__color {
                 border-radius: 50%;
-                display: inline-block;
-                height: 8px;
-                width: 8px;
+                display: block;
+                height: 12px;
+                width: 12px;
+            }
+
+            &__col-small {
+                flex: none;
+                width: 20px;
             }
         }
 
@@ -221,17 +259,8 @@
             text-align: center;
         }
 
-        &.stuck &__table-wrapper {
-            max-height: 215px;
-            overflow-y: auto;
-        }
-
-        &.stuck &__table__row-limited {
-            display: table-row;
-        }
-
         &.stuck &__limit {
-            display: none;
+            opacity: 0;
         }
 
         &__table &__exclude {
@@ -239,7 +268,7 @@
         }
 
         &.stuck &__table &__exclude {
-            display: inline;
+            // display: inline;
             height: 17px;
             width: 48px;
         }

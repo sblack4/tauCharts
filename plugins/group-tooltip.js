@@ -313,33 +313,29 @@
                         value: self._getFormat(groupByField)(data[0][groupByField])
                     }) : ''),
                     self.tableTemplate({
-                        rows: [
-                            self.headerTemplate({
+                        headers: fields.map(function (f) {
+                            return self.headerCellTemplate({
+                                field: self._getLabel(f)
+                            });
+                        }).join(''),
+                        rows: data.map(function (d, i) {
+                            return self.rowTemplate({
+                                rowId: model.id(d),
+                                color: model.color(d),
+                                colorClass: model.class(d),
+                                limitedClass: (i < settings.recordsLimit ? '' :
+                                    'graphical-report__tooltip__table__row-limited'
+                                ),
                                 cells: fields.map(function (f) {
-                                    return self.headerCellTemplate({
-                                        field: self._getLabel(f)
+                                    return self.cellTemplate({
+                                        value: self._getFormat(f)(d[f]),
+                                        numericClass: (typeof d[f] !== 'number' ? '' :
+                                            'graphical-report__tooltip__table__cell-numeric'
+                                        )
                                     });
                                 }).join('')
-                            }),
-                            data.map(function (d, i) {
-                                return self.rowTemplate({
-                                    rowId: model.id(d),
-                                    color: model.color(d),
-                                    colorClass: model.class(d),
-                                    limitedClass: (i < settings.recordsLimit ? '' :
-                                        'graphical-report__tooltip__table__row-limited'
-                                    ),
-                                    cells: fields.map(function (f) {
-                                        return self.cellTemplate({
-                                            value: self._getFormat(f)(d[f]),
-                                            numericClass: (typeof d[f] !== 'number' ? '' :
-                                                'graphical-report__tooltip__table__cell-numeric'
-                                            )
-                                        });
-                                    }).join('')
-                                });
-                            }).join('')
-                        ].join('')
+                            });
+                        }).join('')
                     }),
                     isLimited ? self.limitTemplate({
                         text: '...'
@@ -348,14 +344,16 @@
             },
 
             _getFormat: function (k) {
-                var meta = this._metaInfo[k] || {format: function (x) {
-                    return x;
-                }};
+                var meta = this._metaInfo[k] || {
+                    format: function (x) {
+                        return x;
+                    }
+                };
                 return meta.format;
             },
 
             _getLabel: function (k) {
-                var meta = this._metaInfo[k] || {label: k};
+                var meta = this._metaInfo[k] || { label: k };
                 return meta.label;
             },
 
@@ -453,46 +451,78 @@
             ].join('')),
 
             tableTemplate: tpl([
+                '<div class="graphical-report__tooltip__table-wrapper-fixed">',
                 '<div class="graphical-report__tooltip__table-wrapper">',
                 '<div class="graphical-report__tooltip__table">',
+
+                '<div class="graphical-report__tooltip__table__header">',
+
+                '<div class="graphical-report__tooltip__table__row">',
+                '<div',
+                ' class="graphical-report__tooltip__table__header__placeholder',
+                ' graphical-report__tooltip__table__cell',
+                ' graphical-report__tooltip__table__col-small">&nbsp;',
+                '<div class="graphical-report__tooltip__table__header__placeholder-fixed',
+                ' graphical-report__tooltip__table__header__cell__value-fixed">&nbsp;</div>',
+                '</div>',
+                '{{headers}}',
+                '</div>',
+
+                '</div>',
+
+                '<div class="graphical-report__tooltip__table__rows-group">',
                 '{{rows}}',
+                '</div>',
+
+                '</div>',
                 '</div>',
                 '</div>'
             ].join('')),
 
-            headerTemplate: tpl([
-                '<div class="graphical-report__tooltip__table__header">',
-                '<span class="graphical-report__tooltip__table__header__placeholder"></span>',
-                '{{cells}}',
-                '</div>'
-            ].join('')),
-
             headerCellTemplate: tpl([
-                '<span class="graphical-report__tooltip__table__header__cell">',
+                '<div',
+                ' class="graphical-report__tooltip__table__cell',
+                ' graphical-report__tooltip__table__header__cell">',
+
+                '<div class="graphical-report__tooltip__table__cell__value',
+                ' graphical-report__tooltip__table__header__cell__value">',
                 '{{field}}',
-                '</span>'
+
+                // Note: Fix header position for scroll.
+                '<div class="graphical-report__tooltip__table__cell__value',
+                ' graphical-report__tooltip__table__header__cell__value',
+                ' graphical-report__tooltip__table__header__cell__value-fixed">',
+                '{{field}}',
+                '</div>',
+
+                '</div>',
+
+                '</div>'
             ].join('')),
 
             rowTemplate: tpl([
                 '<div class="graphical-report__tooltip__table__row {{limitedClass}}">',
-                '<span class="graphical-report__tooltip__table__cell">',
+                '<div class="graphical-report__tooltip__table__cell graphical-report__tooltip__table__col-small">',
                 '<span',
                 ' class="graphical-report__tooltip__table__row__color {{colorClass}}"',
                 ' style="background-color: {{color}};"></span>',
-                '</span>',
+                '</div>',
                 '{{cells}}',
-                '<span class="graphical-report__tooltip__table__row__actions">',
-                '<span class="graphical-report__tooltip__exclude i-role-exclude" data-id={{rowId}}>',
-                '<span class="tau-icon-close-gray"></span> Exclude',
-                '</span>',
-                '</span>',
+                // '<div class="graphical-report__tooltip__table__cell',
+                // ' graphical-report__tooltip__table__row__actions">',
+                // '<span class="graphical-report__tooltip__exclude i-role-exclude" data-id={{rowId}}>',
+                // '<span class="tau-icon-close-gray"></span> Exclude',
+                // '</span>',
+                // '</div>',
                 '</div>'
             ].join('')),
 
             cellTemplate: tpl([
-                '<span class="graphical-report__tooltip__table__cell {{numericClass}}">',
+                '<div class="graphical-report__tooltip__table__cell {{numericClass}}">',
+                '<span class="graphical-report__tooltip__table__cell__value">',
                 '{{value}}',
-                '</span>'
+                '</span>',
+                '</div>'
             ].join('')),
 
             limitTemplate: tpl([
