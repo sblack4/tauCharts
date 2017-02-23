@@ -100,7 +100,7 @@
                     }.bind(this), false);
 
                 this._scrollHandler = function (e) {
-                    if (e.target.matches('.graphical-report__tooltip__table-wrapper')) {
+                    if (e.target.matches('.graphical-report__tooltip__table__rows-group')) {
                         return;
                     }
                     this.setState({
@@ -307,6 +307,13 @@
                     return dx;
                 });
 
+                var flex = fields.reduce(function (obj, f) {
+                    obj[f] = Math.max.apply(null, [self._getLabel(f).length].concat(data.map(function (d) {
+                        return String(self._getFormat(f)(d[f])).length;
+                    })));
+                    return obj;
+                }, {});
+
                 return [
                     (groupByField ? self.groupByTemplate({
                         field: self._getLabel(groupByField),
@@ -315,6 +322,7 @@
                     self.tableTemplate({
                         headers: fields.map(function (f) {
                             return self.headerCellTemplate({
+                                flex: flex[f],
                                 field: self._getLabel(f)
                             });
                         }).join(''),
@@ -329,6 +337,7 @@
                                 cells: fields.map(function (f) {
                                     return self.cellTemplate({
                                         value: self._getFormat(f)(d[f]),
+                                        flex: flex[f],
                                         numericClass: (typeof d[f] !== 'number' ? '' :
                                             'graphical-report__tooltip__table__cell-numeric'
                                         )
@@ -451,7 +460,6 @@
             ].join('')),
 
             tableTemplate: tpl([
-                '<div class="graphical-report__tooltip__table-wrapper-fixed">',
                 '<div class="graphical-report__tooltip__table-wrapper">',
                 '<div class="graphical-report__tooltip__table">',
 
@@ -461,10 +469,7 @@
                 '<div',
                 ' class="graphical-report__tooltip__table__header__placeholder',
                 ' graphical-report__tooltip__table__cell',
-                ' graphical-report__tooltip__table__col-small">&nbsp;',
-                '<div class="graphical-report__tooltip__table__header__placeholder-fixed',
-                ' graphical-report__tooltip__table__header__cell__value-fixed">&nbsp;</div>',
-                '</div>',
+                ' graphical-report__tooltip__table__col-small">&nbsp;</div>',
                 '{{headers}}',
                 '</div>',
 
@@ -475,26 +480,18 @@
                 '</div>',
 
                 '</div>',
-                '</div>',
                 '</div>'
             ].join('')),
 
             headerCellTemplate: tpl([
                 '<div',
                 ' class="graphical-report__tooltip__table__cell',
-                ' graphical-report__tooltip__table__header__cell">',
+                ' graphical-report__tooltip__table__cell-header"',
+                ' style="flex: {{flex}};"',
+                ' title="{{field}}">',
 
-                '<div class="graphical-report__tooltip__table__cell__value',
-                ' graphical-report__tooltip__table__header__cell__value">',
+                '<div class="graphical-report__tooltip__table__cell__value">',
                 '{{field}}',
-
-                // Note: Fix header position for scroll.
-                '<div class="graphical-report__tooltip__table__cell__value',
-                ' graphical-report__tooltip__table__header__cell__value',
-                ' graphical-report__tooltip__table__header__cell__value-fixed">',
-                '{{field}}',
-                '</div>',
-
                 '</div>',
 
                 '</div>'
@@ -502,7 +499,8 @@
 
             rowTemplate: tpl([
                 '<div class="graphical-report__tooltip__table__row {{limitedClass}}">',
-                '<div class="graphical-report__tooltip__table__cell graphical-report__tooltip__table__col-small">',
+                '<div class="graphical-report__tooltip__table__cell',
+                ' graphical-report__tooltip__table__col-small">',
                 '<span',
                 ' class="graphical-report__tooltip__table__row__color {{colorClass}}"',
                 ' style="background-color: {{color}};"></span>',
@@ -518,7 +516,10 @@
             ].join('')),
 
             cellTemplate: tpl([
-                '<div class="graphical-report__tooltip__table__cell {{numericClass}}">',
+                '<div',
+                ' class="graphical-report__tooltip__table__cell {{numericClass}}"',
+                ' style="flex: {{flex}};"',
+                ' title="{{value}}">',
                 '<span class="graphical-report__tooltip__table__cell__value">',
                 '{{value}}',
                 '</span>',

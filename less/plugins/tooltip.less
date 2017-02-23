@@ -152,92 +152,62 @@
             }
 
             &__value {
-                margin-left: 4px;
+                margin-left: 6px;
             }
         }
 
-        &__table__rows-group {
-            max-height: 215px;
-            overflow-y: hidden;
-        }
-
-        &__table-wrapper-fixed {
-            position: relative;
-        }
-
-        &__table-wrapper {
-            max-height: 200px;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
-
         &__table {
-            display: table;
+            display: flex;
+            flex-direction: column;
             width: 100%;
 
             &__header {
                 color: @font-gray-dark;
-                display: table-header-group;
                 text-transform: capitalize;
-
-                &__cell {
-                    text-align: center;
-
-                    &__value {
-                        color: transparent;
-
-                        &-fixed {
-                            background-color: @bg-color;
-                            color: @font-gray-dark;
-                            padding: 4px;
-                            position: absolute;
-                            top: 0;
-                        }
-                    }
-                }
-
-                &__placeholder-fixed {
-                    width: 12px;
-                }
             }
 
             &__rows-group {
-                display: table-row-group;
+                max-height: 200px;
+                overflow-x: hidden;
+                overflow-y: auto;
             }
 
             &__row {
                 box-sizing: border-box;
-                display: table-row;
+                display: flex;
+                flex-direction: row;
 
                 &:hover {
-                    background: mix(@font-color, @bg-color, 5%);
+                    background-color: mix(@font-color, @bg-color, 10%)
                 }
-
-                // &-limited {
-                //     height: 0;
-                //     overflow: hidden;
-                // }
             }
 
             &__cell {
                 align-items: center;
                 box-sizing: border-box;
-                flex: 1 1;
-                flex-direction: column;
-                display: table-cell;
-                justify-content: center;
-                padding: 4px;
+                flex-direction: row;
+                display: flex;
+                justify-content: flex-start;
+                min-width: min-content;
+                overflow: hidden;
+                padding: 4px 6px;
                 text-align: left;
 
-                &__value {
-                    overflow: hidden;
+                &-numeric {
+                    justify-content: flex-end;
+                    text-align: right;
                     text-overflow: ellipsis;
                     white-space: nowrap;
-                    width: 100%;
                 }
 
-                &-numeric {
-                    text-align: right;
+                &-header {
+                    justify-content: center;
+                    text-align: center;
+                }
+
+                &__value {
+                    display: inline-block;
+                    overflow: hidden;
                 }
             }
 
