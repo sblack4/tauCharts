@@ -55,23 +55,30 @@ var utilsDraw = {
         if (highlighted.empty()) {
             return;
         }
-        const untargeted = d3.select(highlighted.node().parentNode)
-            .selectAll(selector)
-            .filter((d) => !filter(d))[0];
-        const lastUntargeted = untargeted[untargeted.length - 1];
-        if (lastUntargeted) {
-            const untargetedIndex = Array.prototype.indexOf.call(
-                lastUntargeted.parentNode.childNodes,
-                lastUntargeted);
-            const nextSibling = lastUntargeted.nextSibling;
-            highlighted.each(function () {
-                const index = Array.prototype.indexOf.call(this.parentNode.childNodes, this);
-                if (index > untargetedIndex) {
-                    return;
-                }
-                this.parentNode.insertBefore(this, nextSibling);
-            });
-        }
+        const parents = Array.from(highlighted[0].reduce((map, el) => {
+            return map.set(el, true);
+        }, new Map()).keys());
+        parents.forEach((parent) => {
+            const untargeted = d3.select(parent)
+                .selectAll(selector)
+                .filter((d) => !filter(d))[0];
+            const lastUntargeted = untargeted[untargeted.length - 1];
+            if (lastUntargeted) {
+                const untargetedIndex = Array.from(lastUntargeted.parentNode.children).indexOf(lastUntargeted);
+                const nextSibling = lastUntargeted.nextSibling;
+                const items = highlighted.filter(function () {
+                    return (this.parentNode === parent);
+                });
+                const children = Array.from(parent.children);
+                items.each(function () {
+                    const index = children.indexOf(this);
+                    if (index > untargetedIndex) {
+                        return;
+                    }
+                    parent.insertBefore(this, nextSibling);
+                });
+            }
+        });
     }
 };
 

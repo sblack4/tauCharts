@@ -329,9 +329,11 @@
                 });
 
                 var flex = fields.reduce(function (obj, f) {
-                    obj[f] = Math.max.apply(null, [self._getLabel(f).length].concat(data.map(function (d) {
-                        return String(self._getFormat(f)(d[f])).length;
-                    })));
+                    obj[f] = Math.max.apply(null, self._getLabel(f).split(' ').concat(data.map(function (d) {
+                        return String(self._getFormat(f)(d[f]));
+                    })).map(function (text) {
+                        return text.length;
+                    }));
                     return obj;
                 }, {});
 

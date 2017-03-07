@@ -266,9 +266,7 @@ var utilsDom = {
             // unneccessary repaints.
 
             // Get from/to index pairs.
-            const unsorted = Array.prototype.filter.call(
-                parent.childNodes,
-                (el) => el.nodeType === Node.ELEMENT_NODE);
+            const unsorted = Array.from(parent.children);
             const sorted = unsorted.slice().sort(sorter);
             const unsortedIndices = unsorted.reduce((map, el, i) => {
                 map.set(el, i);
