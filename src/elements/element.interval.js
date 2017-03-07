@@ -415,7 +415,7 @@ const Interval = {
         const measureCursor = (flip ? cursorY : cursorX);
         const valueCursor = (flip ? cursorX : cursorY);
         const isBetween = ((value, start, end) => value >= start && value <= end);
-        const closestElements = (function getClosestElements(el) {
+        const closestElementsInfo = (function getClosestElements(el) {
             if (Array.isArray(el)) {
                 return el;
             }
@@ -425,22 +425,24 @@ const Interval = {
                 const elStart = (flip ? el.box.left : el.box.top);
                 const elEnd = (flip ? el.box.right : el.box.bottom);
                 const cursorInside = isBetween(valueCursor, elStart, elEnd);
-                if (!cursorInside &&
+                const isFarAway = (!cursorInside &&
                     (Math.abs(valueCursor - elStart) > maxHighlightDistance) &&
                     (Math.abs(valueCursor - elEnd) > maxHighlightDistance)
-                ) {
-                    return null;
-                }
+                );
                 const distToValue = Math.abs(valueCursor - ((el.invert !== flip) ? elEnd : elStart));
-                return Object.assign(el, {distToValue, cursorInside});
+                return Object.assign(el, {distToValue, cursorInside, isFarAway});
             })
-            .filter((el) => el)
             .sort(((a, b) => {
                 if (a.cursorInside !== b.cursorInside) {
                     return (b.cursorInside - a.cursorInside);
                 }
                 return (Math.abs(a.distToValue) - Math.abs(b.distToValue));
             }))
+        if (closestElementsInfo.length === 0 || closestElementsInfo[0].isFarAway) {
+            return null;
+        }
+
+        const closestElements = closestElementsInfo
             .map((el) => {
                 const x = (el.cx + translate.x);
                 const y = (el.cy + translate.y);
@@ -449,13 +451,9 @@ const Interval = {
                 return {node: el.node, data: el.data, distance, secondaryDistance, x, y};
             });
 
-        if (closestElements[0]) {
-            closestElements[0].siblings = closestElements;
-            closestElements[0].siblingsDim = this.node().screenModel.model.scaleX.dim;
-            return closestElements[0];
-        }
-
-        return null;
+        closestElements[0].siblings = closestElements;
+        closestElements[0].siblingsDim = this.node().screenModel.model.scaleX.dim;
+        return closestElements[0];
     },
 
     highlight(filter) {
