@@ -286,6 +286,7 @@ const BasePath = {
                 return currentIndex;
             };
         })();
+        this._getDataSetId = getDataSetId;
 
         const frameBinding = frameSelection
             .data(fullFibers, getDataSetId);
@@ -462,6 +463,8 @@ const BasePath = {
         container
             .selectAll('.i-role-label')
             .classed(classed);
+
+        this._sortElements(filter);
     },
 
     highlightDataPoints(filter) {
@@ -492,6 +495,7 @@ const BasePath = {
             })
             .classed(`${CSS_PREFIX}highlighted`, filter);
 
+        // Display cursor line
         const flip = unit.config.flip;
         const highlighted = dots.filter(filter);
         var cursorLine = container.select('.cursor-line');
@@ -499,7 +503,7 @@ const BasePath = {
             cursorLine.remove();
         } else {
             if (cursorLine.empty()) {
-                cursorLine = container.insert('line', ':first-child');
+                cursorLine = container.append('line');
             }
             const model = unit.screenModel.model;
             const x1 = model.xi(highlighted.data()[0]);
@@ -515,10 +519,37 @@ const BasePath = {
                 .attr('y2', flip ? x2 : y2);
         }
 
-        utilsDraw.raiseElements(container, '.i-role-path', (fiber) => {
-            return fiber
+        this._sortElements(filter);
+    },
+
+    _sortElements(filter) {
+
+        const container = this.node().config.options.container;
+
+        const pathId = new Map();
+        const pathFilter = new Map();
+        const getDataSetId = this._getDataSetId;
+        container.selectAll('.i-role-path').each(function (d) {
+            pathId.set(this, getDataSetId(d));
+            pathFilter.set(this, d
                 .filter(isNonSyntheticRecord)
-                .some(filter);
+                .some(filter));
+        });
+
+        const compareFilterThenGroupId = utils.createMultiSorter(
+            (a, b) => (pathFilter.get(a) - pathFilter.get(b)),
+            (a, b) => (pathId.get(a) - pathId.get(b))
+        );
+        const elementsOrder = {
+            line: 0,
+            g: 1,
+            text: 2
+        };
+        utilsDom.sortChildren(container.node(), (a, b) => {
+            if (a.tagName === 'g' && b.tagName === 'g') {
+                return compareFilterThenGroupId(a, b);
+            }
+            return (elementsOrder[a.tagName] - elementsOrder[b.tagName]);
         });
     }
 };
