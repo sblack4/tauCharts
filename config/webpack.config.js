@@ -21,7 +21,7 @@ var babelConfig = {
     test: /\.js$/,
     exclude: /node_modules|libs|bower_components/,
     loader: 'babel-loader',
-    query: {
+    options: {
         presets: ['es2015'],
         cacheDirectory: ensureDir(path.join(cachePath, './babelJS'))
     }
@@ -29,10 +29,8 @@ var babelConfig = {
 var generateTestConf = function (addLoaders) {
     return {
         resolve: {
-            root: [
-                path.resolve('.')
-            ],
-            modulesDirectories: [
+            modules: [
+                path.resolve('.'),
                 'bower_components',
                 'node_modules'
             ],
@@ -63,7 +61,7 @@ var generateTestConf = function (addLoaders) {
             }
         },
         module: {
-            loaders: [
+            rules: [
                 {test: /\.css$/, loader: 'css-loader'},
                 {
                     test: /modernizer[\\\/]modernizr\.js$/,
@@ -78,7 +76,6 @@ var generateTestConf = function (addLoaders) {
         query: {
             cacheDirectory: ensureDir(path.join(cachePath, './babelJS'))
         },
-        debug: false,
         stats: {
             colors: true,
             reasons: true
@@ -97,7 +94,7 @@ var exportBuild = {
     output: {
         library: 'exportTo',
         libraryTarget: 'umd',
-        path: 'build/development/plugins/',
+        path: toAbsolute('../build/development/plugins/'),
         filename: 'tauCharts.export.js'
     },
     resolve: {
@@ -113,16 +110,11 @@ var exportBuild = {
             promise: toAbsolute('../bower_components/es6-promise/promise.js')
         }
     },
-    externals: {
-        taucharts: {
-            commonjs: 'taucharts',
-            commonjs2: 'taucharts',
-            amd: 'taucharts',
-            root: 'tauCharts'
-        }
-    },
+    externals: transformUMDExternal({
+        taucharts: 'tauCharts'
+    }),
     module: {
-        loaders: [
+        rules: [
             babelConfig,
             {
                 test: /\.css$/,
@@ -144,14 +136,16 @@ var webpackConf = {
     output: {
         library: 'tauCharts',
         libraryTarget: 'umd',
-        path: 'build/development',
+        path: toAbsolute('../build/development'),
         filename: 'tauCharts.js'
     },
-    externals:  transformUMDExternal({
+    externals: transformUMDExternal({
         d3: 'd3'
     }),
     module: {
-        loaders: [babelConfig]
+        rules: [
+            babelConfig
+        ]
     },
     stats: {
         timings: true
