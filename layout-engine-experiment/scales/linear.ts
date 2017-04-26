@@ -4,10 +4,12 @@ import { scaleLinear, ScaleLinear } from 'd3';
 class LinearScale implements Scale<number>{
 
     type: string;
+    aggregations: string[];
     private _scale: ScaleLinear<number, number>;
 
     constructor() {
         this.type = ScaleType.Continuous;
+        this.aggregations = ['min', 'max'];
         this._scale = scaleLinear<number, number>();
     }
 

@@ -2,27 +2,216 @@ import { Element } from './elements/element';
 
 export interface SpecUnit {
     type: string,
-    data: {
-        source: Object[],
-        aggregations: {
-            [property: string]: {
-                [aggregation: string]: any
-            }
+    // data: {
+    //     source: Object[],
+    //     aggregations: {
+    //         [property: string]: {
+    //             [aggregation: string]: any
+    //         }
+    //     }
+    // },
+    data?: Object[],
+    scales?: {
+        [model: string]: {
+            type: string,
+            property: string,
+            options?: Object
         }
     },
-    scales: {
-        type: string,
-        property: string
-    }[],
-    units?: SpecUnit[]
+    units?: SpecUnit[],
+    options?: Object
 }
 
-export interface Spec {
+export interface ShortSpec {
+    type: string,
+    data?: Object[]
+}
 
+export interface MultiShortSpec {
+    layers: ShortSpec[],
+    data?: Object[]
+}
+
+export interface LineChartSpec extends ShortSpec {
+    type: 'line',
+    x: string | string[],
+    y: string | string[],
+    color?: string,
+    label?: string
 }
 
 export interface DrawingNode {
     config: SpecUnit,
     element: Element,
-    nodes?: DrawingNode[]
+    nodes?: DrawingNode[],
+    parent: DrawingNode | null
 }
+
+//------------------------------------
+//
+//             Samples:
+//
+
+var shortSpec: LineChartSpec = {
+    type: 'line',
+    x: 'effort',
+    y: 'date',
+    color: 'team',
+    data: [
+        { effort: 40, date: new Date(2017, 1, 1), team: 'A' },
+        { effort: 30, date: new Date(2017, 1, 2), team: 'A' },
+        { effort: 50, date: new Date(2017, 1, 3), team: 'A' },
+        { effort: 20, date: new Date(2017, 1, 1), team: 'B' },
+        { effort: 30, date: new Date(2017, 1, 2), team: 'B' },
+        { effort: 40, date: new Date(2017, 1, 3), team: 'B' }
+    ]
+};
+
+var multiSpec = {
+    layers: [
+        {
+            type: 'bar',
+            x: 'effort',
+            y: 'date',
+            color: 'team',
+        },
+        {
+            type: 'line',
+            x: 'effort',
+            y: 'date',
+            color: 'team',
+        }
+    ],
+    data: [
+        { effort: 40, date: new Date(2017, 1, 1), team: 'A' },
+        { effort: 30, date: new Date(2017, 1, 2), team: 'A' },
+        { effort: 50, date: new Date(2017, 1, 3), team: 'A' },
+        { effort: 20, date: new Date(2017, 1, 1), team: 'B' },
+        { effort: 30, date: new Date(2017, 1, 2), team: 'B' },
+        { effort: 40, date: new Date(2017, 1, 3), team: 'B' }
+    ]
+};
+
+var spec: SpecUnit = {
+    type: 'cartesian',
+    data: [
+        { effort: 40, date: new Date(2017, 1, 1), team: 'A' },
+        { effort: 30, date: new Date(2017, 1, 2), team: 'A' },
+        { effort: 50, date: new Date(2017, 1, 3), team: 'A' },
+        { effort: 20, date: new Date(2017, 1, 1), team: 'B' },
+        { effort: 30, date: new Date(2017, 1, 2), team: 'B' },
+        { effort: 40, date: new Date(2017, 1, 3), team: 'B' }
+    ],
+    scales: {
+        'x': {
+            type: 'time',
+            property: 'date'
+        },
+        'y': {
+            type: 'linear',
+            property: 'effort'
+        },
+        'id': {
+            type: 'identity',
+            property: ''
+        }
+    },
+    units: [
+        {
+            type: 'grid'
+        },
+        {
+            type: 'axis-bottom',
+            options: {
+                format: 'date-short'
+            }
+        },
+        {
+            type: 'axis-left'
+        },
+        {
+            type: 'bar',
+            units: [
+                {
+                    type: 'bar-label',
+                    scales: {
+                        'label': {
+                            type: 'ordinal',
+                            property: 'effort'
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            type: 'line',
+            scales: {
+                'color': {
+                    type: 'palette',
+                    property: 'team',
+                    options: {
+                        palette: [
+                            '#d42',
+                            '#2d4',
+                            '#24d'
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+};
+
+var facetSpec: SpecUnit = {
+    type: 'cartesian',
+    data: [
+        { country: 'Belarus', city: 'Minsk', people: 2000000 },
+        { country: 'Belarus', city: 'Gomel', people: 500000 },
+        { country: 'Ukraine', city: 'Kiev', people: 4000000 },
+        { country: 'Ukraine', city: 'Lviv', people: 1000000 },
+    ],
+    scales: {
+        'x': {
+            type: 'ordinal',
+            property: 'country'
+        },
+        'y': {
+            type: 'linear',
+            property: 'people'
+        },
+        'id': {
+            type: 'identity',
+            property: ''
+        }
+    },
+    units: [
+        {
+            type: 'facet',
+            units: [
+                {
+                    type: 'cartesian',
+                    scales: {
+                        'x': {
+                            type: 'ordinal',
+                            property: 'city'
+                        }
+                    },
+                    units: [
+                        {
+                            type: 'line'
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            type: 'axis-bottom',
+            options: {
+                format: 'date-short'
+            }
+        },
+        {
+            type: 'axis-left'
+        }
+    ]
+};
