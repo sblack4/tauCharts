@@ -7,6 +7,8 @@ require('./tasks/gulp-js')(gulp, plugins);
 require('./tasks/gulp-css')(gulp, plugins);
 require('./tasks/gulp-watch')(gulp, plugins);
 
+require('./tasks/gulp-layout-engine')(gulp, plugins);
+
 gulp.task('build', [
     'build-js',
     'build-plugins-js',

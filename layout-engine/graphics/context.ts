@@ -1,14 +1,10 @@
 export interface DrawingContext {
 
-    path(): this,
-    moveTo(x: number, y: number): this,
-    lineTo(x: number, y: number): this,
-    curveTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number): this,
-    close(): this,
-
+    path(commands: PathCommand[]): this,
     line(x1: number, y1: number, x2: number, y2: number): this,
     rect(x: number, y: number, width: number, height: number): this,
     circle(cx: number, cy: number, r: number): this,
+    // image(image: string | ImageData, x: number, y: number, width: number, height: number): this,
 
     strokeStyle(style: StrokeStyle): this,
     stroke(style?: StrokeStyle): this,
@@ -17,9 +13,17 @@ export interface DrawingContext {
     fill(style?: FillStyle): this,
 
     textStyle(style: TextStyle): this,
-    text(x: number, y: number, text: string, style?: TextStyle): this,
+    text(x: number, y: number, text: string, style?: TextStyle): this
+}
 
-    render(): void
+export interface PathCommand {
+    type: ('M' | 'L' | 'Q' | 'C' | 'Z'),
+    x?: number,
+    y?: number,
+    x1?: number,
+    y1?: number,
+    x2?: number,
+    y2?: number
 }
 
 export interface StrokeStyle {

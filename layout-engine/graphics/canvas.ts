@@ -18,38 +18,39 @@ export default class CanvasContext implements Graphics.DrawingContext {
         this._context = context;
         this._currentType = null;
         this._current = null;
-        this._fillRule = null;
+        this._fillRule = 'nonzero';
         this._textStyle = {};
     }
 
-    path() {
+    path(commands: Graphics.PathCommand[]) {
+        this._currentType = 'path';
         this._context.beginPath();
-        this._currentType = 'path';
+        commands.forEach((c) => {
+            switch (c.type) {
+                case 'M':
+                    this._context.moveTo(c.x, c.y);
+                    break;
+                case 'L':
+                    this._context.lineTo(c.x, c.y);
+                    break;
+                case 'Q':
+                    this._context.quadraticCurveTo(c.x1, c.y1, c.x, c.y);
+                    break;
+                case 'C':
+                    this._context.bezierCurveTo(c.x1, c.y1, c.x2, c.y2, c.x, c.y);
+                    break;
+                case 'Z':
+                    this._context.closePath();
+                    break;
+            }
+        });
         return this;
     }
-    moveTo(x: number, y: number) {
-        this._context.moveTo(x, y);
-        return this;
-    }
-    lineTo(x: number, y: number) {
-        this._context.lineTo(x, y);
-        return this;
-    }
-    curveTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number) {
-        this._context.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
-        return this;
-    }
-    close() {
-        this._context.closePath();
-        return this;
-    }
-
     line(x1: number, y1: number, x2: number, y2: number) {
-        this._currentType = 'path';
-        this.path()
-            .moveTo(x1, y1)
-            .lineTo(x2, y2)
-            .close();
+        this.path([
+            { type: 'M', x: x1, y: y1 },
+            { type: 'L', x: x2, y: y2 }
+        ]);
         return this;
     }
     rect(x: number, y: number, width: number, height: number) {
@@ -134,38 +135,43 @@ export default class CanvasContext implements Graphics.DrawingContext {
         }
         if (this._currentType === 'text') {
             let t = this._current;
-            this._context.strokeText(t.text, t.x, t.y);
+            this._context.fillText(t.text, t.x, t.y);
         }
         if (this._currentType === 'rect') {
             let r = this._current;
-            this._context.strokeRect(r.x, r.y, r.width, r.height);
+            this._context.fillRect(r.x, r.y, r.width, r.height);
         }
         this._currentType = null;
         this._current = null;
         return this;
     }
+
     textStyle(style: Graphics.TextStyle) {
         if (style.anchor) {
-            this._context.textAlign = style.anchor;
+            this._context.textAlign = ({
+                'start': 'start',
+                'middle': 'center',
+                'end': 'end'
+            }[style.anchor]);
         }
         if (style.baseline) {
             this._context.textBaseline = style.baseline;
         }
 
         this._textStyle = Object.assign(this._textStyle, style);
-        var font = this._textStyle;
+        var t = this._textStyle;
         var fontProps = [];
-        if (font.size) {
-            fontProps.push(`${font.size}px`);
+        if (t.style && t.style !== 'normal') {
+            fontProps.push(t.style);
         }
-        if (font.weight) {
-            fontProps.push(font.weight);
+        if (t.weight) {
+            fontProps.push(t.weight);
         }
-        if (font.style && font.style !== 'normal') {
-            fontProps.push(font.style);
+        if (t.size) {
+            fontProps.push(`${t.size}px`);
         }
-        if (font.family) {
-            fontProps.push(font.family);
+        if (t.family) {
+            fontProps.push(t.family);
         }
         if (fontProps.length > 0) {
             this._context.font = fontProps.join(' ');
@@ -174,13 +180,12 @@ export default class CanvasContext implements Graphics.DrawingContext {
         return this;
     }
     text(x: number, y: number, text: string, style?: Graphics.TextStyle) {
+        if (style) {
+            this.textStyle(style);
+        }
         this._currentType = 'text';
         this._current = { x, y, text };
         return this;
-    }
-
-    render() {
-        return;
     }
 
 }

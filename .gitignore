@@ -12,3 +12,5 @@ coverage
 *.scssc
 
 *.sassc
+
+layout-engine/**/*.js
