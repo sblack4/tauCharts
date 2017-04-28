@@ -8,6 +8,8 @@ import createBarGroup from '../elements/bar';
 
 import { createAxisBottom } from '../elements/axis';
 
+import createCartesianContainer from '../elements/cartesian';
+
 //
 // Sample drawing
 
@@ -76,3 +78,25 @@ var axis = createAxisBottom({
     label: 'Label'
 });
 axis.draw(canvasContext, { data, scales });
+
+//
+// Sample cartesian container
+
+var scales = {
+    x: createLinearScale(data, 'count'),
+    y: createLinearScale(data, 'effort', { includeZero: true })
+};
+
+var cartesian = createCartesianContainer({
+    children: [
+        createBarGroup(),
+        createAxisBottom()
+    ]
+});
+var dx = 200;
+var dy = 50;
+var space = cartesian.getRequiredSpace({ data, scales: scales, ratio: [1, 1] });
+scales.x.range([space.stakes[0][0] + dx, space.stakes[1][0] + dx]);
+scales.y.range([space.stakes[0][1] + dy, space.stakes[1][1] + dy]);
+cartesian.draw(canvasContext, { data, scales });
+cartesian.draw(svgContext, { data, scales });

@@ -40,17 +40,31 @@ class BarGroup implements CartesianElement {
         const s = this._options;
 
         const count = data.length;
-        const size: [number, number] = [
-            count * s.minWidth + (count - 1) * s.padding * s.minWidth,
+        if (count === 0) {
+            return {
+                stakes: [[0, 0], [0, 0]],
+                bounds: [[0, 0], [0, 0]]
+            };
+        }
+
+        const barWidth = s.minWidth;
+
+        const stakes: [number, number] = [
+            count * barWidth + (count - 1) * s.padding * barWidth,
             s.minHeight
         ];
+        const bounds: [number, number] = [
+            stakes[0],
+            stakes[1] + scales.x.type === ScaleType.Continuous ? barWidth : 0
+        ];
         if (s.flip) {
-            size.reverse();
+            stakes.reverse();
+            bounds.reverse();
         }
 
         return {
-            stakes: [[0, 0], size],
-            bounds: [[0, 0], size]
+            stakes: [[0, 0], stakes],
+            bounds: [[0, 0], bounds]
         };
     }
 
