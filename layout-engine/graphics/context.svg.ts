@@ -120,7 +120,7 @@ export default class SvgContext implements Graphics.DrawingContext {
         this._currentNode = createSvgElement(this._svg, 'text', {
             x, y,
             'text-anchor': t.anchor,
-            'alignment-baseline': ({
+            'dominant-baseline': ({
                 'hanging': 'hanging',
                 'middle': 'central',
                 'alphabetic': 'alphabetic'

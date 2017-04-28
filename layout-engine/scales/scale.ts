@@ -1,15 +1,25 @@
-export interface Scale<T extends number | string | Date> {
+type Value = (number | string | Date);
+
+export interface Scale<TIn extends Value, TOut extends Value> {
     type: string,
-    get(input: T): number,
-    invert(output: number): T,
-    domain(): T[],
-    domain(values: T[]): this,
+    dimension: string,
+    aggregations: string[],
+    value(input: TIn): TOut,
+    from(data: Object): TOut,
+    invert(output: TOut): TIn,
+    domain(): TIn[],
+    domain(values: TIn[]): this,
     range(): [number, number],
-    range(range: [number, number]): this,
-    aggregations: string[]
+    range(range: [number, number]): this
 }
 
 export const ScaleType = {
     Continuous: 'continuous',
     Ordinal: 'ordinal'
-}
+};
+
+export type ScaleFactory = (
+    data: Object[],
+    dimension: string,
+    options?: Object[]
+) => Scale<Value, Value>;

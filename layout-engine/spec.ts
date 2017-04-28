@@ -2,19 +2,11 @@ import { Element } from './elements/element';
 
 export interface SpecUnit {
     type: string,
-    // data: {
-    //     source: Object[],
-    //     aggregations: {
-    //         [property: string]: {
-    //             [aggregation: string]: any
-    //         }
-    //     }
-    // },
     data?: Object[],
     scales?: {
         [model: string]: {
             type: string,
-            property: string,
+            dimension: string,
             options?: Object
         }
     },
@@ -105,15 +97,15 @@ var spec: SpecUnit = {
     scales: {
         'x': {
             type: 'time',
-            property: 'date'
+            dimension: 'date'
         },
         'y': {
             type: 'linear',
-            property: 'effort'
+            dimension: 'effort'
         },
         'id': {
             type: 'identity',
-            property: ''
+            dimension: ''
         }
     },
     units: [
@@ -137,7 +129,7 @@ var spec: SpecUnit = {
                     scales: {
                         'label': {
                             type: 'ordinal',
-                            property: 'effort'
+                            dimension: 'effort'
                         }
                     }
                 }
@@ -148,7 +140,7 @@ var spec: SpecUnit = {
             scales: {
                 'color': {
                     type: 'palette',
-                    property: 'team',
+                    dimension: 'team',
                     options: {
                         palette: [
                             '#d42',
@@ -173,15 +165,15 @@ var facetSpec: SpecUnit = {
     scales: {
         'x': {
             type: 'ordinal',
-            property: 'country'
+            dimension: 'country'
         },
         'y': {
             type: 'linear',
-            property: 'people'
+            dimension: 'people'
         },
         'id': {
             type: 'identity',
-            property: ''
+            dimension: '#'
         }
     },
     units: [
@@ -193,12 +185,15 @@ var facetSpec: SpecUnit = {
                     scales: {
                         'x': {
                             type: 'ordinal',
-                            property: 'city'
+                            dimension: 'city'
                         }
                     },
                     units: [
                         {
                             type: 'line'
+                        },
+                        {
+                            type: 'axis-bottom'
                         }
                     ]
                 }

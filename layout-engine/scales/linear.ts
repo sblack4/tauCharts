@@ -1,20 +1,44 @@
-import { ScaleType, Scale } from './scale';
+import { ScaleType, Scale, ScaleFactory } from './scale';
 import { scaleLinear, ScaleLinear } from 'd3';
 
-class LinearScale implements Scale<number>{
+interface LinearScaleOptions {
+    nice?: boolean;
+    includeZero?: boolean;
+}
+
+const defaultLinearScaleOptions: LinearScaleOptions = {
+    nice: false,
+    includeZero: false
+};
+
+class LinearScale implements Scale<number, number>{
 
     type: string;
+    dimension: string;
     aggregations: string[];
+    static aggregations = ['min', 'max'];
     private _scale: ScaleLinear<number, number>;
+    private _options: LinearScaleOptions;
 
-    constructor() {
+    constructor(dimension: string, options: LinearScaleOptions) {
         this.type = ScaleType.Continuous;
-        this.aggregations = ['min', 'max'];
+        this.dimension = dimension;
+        this._options = Object.assign({},
+            defaultLinearScaleOptions,
+            options);
+        this.aggregations = LinearScale.aggregations;
         this._scale = scaleLinear<number, number>();
+        if (this._options.nice) {
+            this._scale.nice();
+        }
     }
 
-    get(x: number) {
+    value(x: number) {
         return this._scale(x);
+    }
+
+    from(data: Object) {
+        return this._scale(data[this.dimension]);
     }
 
     invert(x: number) {
@@ -27,7 +51,10 @@ class LinearScale implements Scale<number>{
         if (values === undefined) {
             return this._scale.domain();
         }
-        this._scale.domain(values);
+        const domain = this._options.includeZero ?
+            [Math.min(0, values[0]), Math.max(0, values[1])] :
+            values.slice();
+        this._scale.domain(domain);
         return this;
     }
 
@@ -42,6 +69,14 @@ class LinearScale implements Scale<number>{
     }
 }
 
-export default function createLinearScale() {
-    return new LinearScale();
+export default function createLinearScale(
+    data: Object[],
+    dimension: string,
+    options: LinearScaleOptions = {}) {
+
+    const values = data.map((d) => d[dimension])
+        .sort((a, b) => a - b);
+
+    return new LinearScale(dimension, options)
+        .domain([values[0], values[values.length - 1]]);
 }

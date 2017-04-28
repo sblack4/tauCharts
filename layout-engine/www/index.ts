@@ -1,6 +1,15 @@
 import { DrawingContext } from '../graphics/context';
-import CanvasContext from '../graphics/canvas';
-import SvgContext from '../graphics/svg';
+import CanvasContext from '../graphics/context.canvas';
+import SvgContext from '../graphics/context.svg';
+import d3 from 'd3';
+
+import createLinearScale from '../scales/linear';
+import createBarGroup from '../elements/bar';
+
+import { createAxisBottom } from '../elements/axis';
+
+//
+// Sample drawing
 
 function drawImage(context: DrawingContext) {
     context.fillStyle({ color: '#d42' });
@@ -36,5 +45,34 @@ function drawImage(context: DrawingContext) {
 var canvas = document.querySelector('canvas');
 var svg = document.querySelector('svg');
 
-drawImage(new CanvasContext(canvas.getContext('2d')));
-drawImage(new SvgContext(svg));
+var canvasContext = new CanvasContext(canvas.getContext('2d'));
+var svgContext = new SvgContext(svg);
+drawImage(canvasContext);
+drawImage(svgContext);
+
+//
+// Sample bar group
+
+var data = [
+    { effort: 100, count: 5 },
+    { effort: 50, count: 3 },
+    { effort: 70, count: 4 }
+];
+
+var scales = {
+    x: createLinearScale(data, 'count')
+        .range([20, 80]),
+    y: createLinearScale(data, 'effort', { includeZero: true })
+        .range([20, 80])
+};
+
+var bars = createBarGroup();
+bars.draw(canvasContext, { data, scales });
+
+//
+// Sample axis
+
+var axis = createAxisBottom({
+    label: 'Label'
+});
+axis.draw(canvasContext, { data, scales });

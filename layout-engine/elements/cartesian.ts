@@ -1,18 +1,24 @@
 import { Element } from './element';
+import { DrawingContext } from '../graphics/context';
 import { Scale } from '../scales/scale'
 
 export interface CartesianElement extends Element {
 
-    getRequiredSpace(options: {
-        data: Object[],
-        scales: { [model: string]: Scale<any> },
-        ratio: [number, number]
-    }): CartesianElementSpace;
+    getRequiredSpace(
+        options: {
+            data: Object[],
+            scales: { [model: string]: Scale<any, any> },
+            ratio: [number, number]
+        }
+    ): CartesianElementSpace;
 
-    draw(context: any, options: {
-        data: Object[],
-        scales: { [model: string]: Scale<any> }
-    });
+    draw(
+        context: DrawingContext,
+        options: {
+            data: Object[],
+            scales: { [model: string]: Scale<any, any> }
+        }
+    ): void;
 
 }
 

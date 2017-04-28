@@ -13,6 +13,9 @@ module.exports = (gulp, { connect }) => {
             format: 'iife',
             useStrict: true,
             sourceMap: 'inline',
+            external: [
+                'd3'
+            ],
             cache,
             plugins: [
                 require('rollup-plugin-typescript')({
