@@ -1,6 +1,7 @@
-import Graphics from './context';
+import { DrawingContext, PathCommand } from './context';
+import Style from './style';
 
-export default class CanvasContext implements Graphics.DrawingContext {
+export default class CanvasContext implements DrawingContext {
 
     private _context: CanvasRenderingContext2D;
     private _currentType: 'path' | 'rect' | 'text';
@@ -12,7 +13,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         height?: number
     };
     private _fillRule: string;
-    private _textStyle: Graphics.TextStyle;
+    private _textStyle: Style.TextStyle;
 
     constructor(context: CanvasRenderingContext2D) {
         this._context = context;
@@ -22,7 +23,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         this._textStyle = {};
     }
 
-    path(commands: Graphics.PathCommand[]) {
+    path(commands: PathCommand[]) {
         this._currentType = 'path';
         this._context.beginPath();
         commands.forEach((c) => {
@@ -66,7 +67,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         return this;
     }
 
-    strokeStyle(style: Graphics.StrokeStyle) {
+    strokeStyle(style: Style.StrokeStyle) {
         if (style.color) {
             this._context.strokeStyle = style.color;
         }
@@ -75,7 +76,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         }
         return this;
     }
-    stroke(style?: Graphics.StrokeStyle) {
+    stroke(style?: Style.StrokeStyle) {
         if (style) {
             this.strokeStyle(style);
         }
@@ -94,7 +95,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         return this;
     }
 
-    fillStyle(style: Graphics.FillStyle) {
+    fillStyle(style: Style.FillStyle) {
         if (style.color) {
             this._context.fillStyle = style.color;
         }
@@ -126,7 +127,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         }
         return this;
     }
-    fill(style?: Graphics.FillStyle) {
+    fill(style?: Style.FillStyle) {
         if (style) {
             this.fillStyle(style);
         }
@@ -146,7 +147,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
         return this;
     }
 
-    textStyle(style: Graphics.TextStyle) {
+    textStyle(style: Style.TextStyle) {
         if (style.anchor) {
             this._context.textAlign = ({
                 'start': 'start',
@@ -179,7 +180,7 @@ export default class CanvasContext implements Graphics.DrawingContext {
 
         return this;
     }
-    text(x: number, y: number, text: string, style?: Graphics.TextStyle) {
+    text(x: number, y: number, text: string, style?: Style.TextStyle) {
         if (style) {
             this.textStyle(style);
         }

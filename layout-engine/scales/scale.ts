@@ -13,6 +13,14 @@ export interface Scale<TIn extends Value, TOut extends Value> {
     range(range: [number, number]): this
 }
 
+export interface ContinuousScale<TIn extends Value, TOut extends Value> extends Scale<TIn, TOut> {
+    type: 'continuous'
+}
+
+export interface OrdinalScale<TIn extends Value, TOut extends Value> extends Scale<TIn, TOut> {
+    type: 'ordinal'
+}
+
 export const ScaleType = {
     Continuous: 'continuous',
     Ordinal: 'ordinal'
@@ -23,3 +31,7 @@ export type ScaleFactory = (
     dimension: string,
     options?: Object[]
 ) => Scale<Value, Value>;
+
+export interface ScaleModel {
+    [model: string]: Scale<any, any>
+}

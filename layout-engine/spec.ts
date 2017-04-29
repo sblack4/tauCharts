@@ -1,4 +1,6 @@
 import { Element } from './elements/element';
+import { CartesianElement } from './elements/cartesian';
+import { Scale } from './scales/scale';
 
 export interface SpecUnit {
     type: string,
@@ -32,12 +34,13 @@ export interface LineChartSpec extends ShortSpec {
     label?: string
 }
 
-export interface DrawingNode {
-    config: SpecUnit,
-    element: Element,
-    nodes?: DrawingNode[],
-    parent: DrawingNode | null
-}
+// export interface DrawingNode {
+//     data: SpecUnit,
+//     scales: { [model: string]: Scale<any, any> },
+//     element: CartesianElement,
+//     nodes?: DrawingNode[],
+//     // parent: DrawingNode | null
+// }
 
 //------------------------------------
 //

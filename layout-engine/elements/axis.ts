@@ -1,6 +1,7 @@
-import { CartesianElement, CartesianElementSpace } from './cartesian';
-import { DrawingContext, TextStyle } from '../graphics/context';
-import { Scale, ScaleType } from '../scales/scale';
+import { CartesianElement, CartesianSpace } from './cartesian';
+import { DrawingContext } from '../graphics/context';
+import { TextStyle } from '../graphics/style';
+import { Scale, ScaleType, ScaleModel } from '../scales/scale';
 import { measureText } from '../graphics/text';
 import d3 from 'd3';
 
@@ -58,28 +59,32 @@ function deepAssign<
     return result as A & B & C & D & E;
 }
 
-interface AxisScales {
+type AxisScales = ScaleModel & {
     x: Scale<any, number>,
     y: Scale<any, number>
-}
+};
 
 class AxisBottom implements CartesianElement {
 
     private _options: AxisOptions;
+    data: Object[];
+    scales: AxisScales;
 
-    constructor(options: AxisOptions) {
+    constructor(
+        data: Object[],
+        scales: AxisScales,
+        options: AxisOptions) {
+
+        this.data = data;
+        this.scales = scales;
         this._options = deepAssign({},
             defaultAxisOptions,
             options);
     }
 
-    getRequiredSpace(options: {
-        data: Object[],
-        scales: { [model: string]: Scale<any, any> } & AxisScales,
-        ratio: [number, number]
-    }): CartesianElementSpace {
+    getRequiredSpace(awailableSpace?: CartesianSpace): CartesianSpace {
 
-        const s = this._getLayout(options);
+        const s = this._getLayout();
 
         const sw = s.tsize.width + s.tpad;
         const sh = 0;
@@ -98,12 +103,11 @@ class AxisBottom implements CartesianElement {
         };
     }
 
-    draw(context: DrawingContext, { data, scales }: {
-        data: Object[],
-        scales: { [model: string]: Scale<any, any> } & AxisScales
-    }) {
+    draw(context: DrawingContext) {
 
-        const s = this._getLayout({ data, scales });
+        const { scales } = this;
+
+        const s = this._getLayout();
 
         const [x0, x1] = scales.x.range();
         const y0 = scales.y.range()[1] + s.apad;
@@ -139,10 +143,9 @@ class AxisBottom implements CartesianElement {
         }
     }
 
-    private _getLayout({ data, scales }: {
-        data: Object[],
-        scales: { [model: string]: Scale<any, any> } & AxisScales
-    }) {
+    private _getLayout() {
+
+        const { data, scales } = this;
 
         const {
             textStyle,
@@ -179,6 +182,10 @@ class AxisBottom implements CartesianElement {
 
 }
 
-export function createAxisBottom(options: AxisOptions = {}) {
-    return new AxisBottom(options);
+export function createAxisBottom(
+    data: Object[],
+    scales: AxisScales,
+    options: AxisOptions) {
+
+    return new AxisBottom(data, scales, options);
 }

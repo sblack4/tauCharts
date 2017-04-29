@@ -1,43 +1,45 @@
-import { CartesianElement, CartesianElementSpace } from './cartesian';
+import { CartesianElement, CartesianSpace } from './cartesian';
 import { DrawingContext } from '../graphics/context';
-import { Scale, ScaleType } from '../scales/scale';
+import { Scale, ScaleType, ScaleModel } from '../scales/scale';
 
-export interface BarGroupOptions {
+export interface BarOptions {
     flip?: boolean,
     minHeight?: number,
     minWidth?: number,
     padding?: number
 }
 
-const defaultBarGroupOptions: BarGroupOptions = {
+const defaultBarOptions: BarOptions = {
     flip: false,
     minHeight: 16,
     minWidth: 4,
     padding: 0.25
 };
 
-interface BarGroupScales {
+type BarScales = ScaleModel & {
     x: Scale<any, number>,
     y: Scale<any, number>
-}
+};
 
 class BarGroup implements CartesianElement {
 
-    private _options: BarGroupOptions;
+    private _options: BarOptions;
+    data: Object[];
+    scales: BarScales;
 
-    constructor(options: BarGroupOptions) {
+    constructor(
+        data: Object[],
+        scales: BarScales,
+        options: BarOptions) {
         this._options = Object.assign({},
-            defaultBarGroupOptions,
+            defaultBarOptions,
             options);
     }
 
-    getRequiredSpace({ data, scales, ratio }: {
-        data: Object[],
-        scales: { [model: string]: Scale<any, any> } & BarGroupScales,
-        ratio: [number, number]
-    }): CartesianElementSpace {
+    getRequiredSpace(awailableSpace?: CartesianSpace): CartesianSpace {
 
         const s = this._options;
+        const { data, scales } = this;
 
         const count = data.length;
         if (count === 0) {
@@ -68,10 +70,9 @@ class BarGroup implements CartesianElement {
         };
     }
 
-    draw(context: DrawingContext, { data, scales }: {
-        data: Object[],
-        scales: { [model: string]: Scale<any, any> } & BarGroupScales
-    }) {
+    draw(context: DrawingContext) {
+
+        const { data, scales } = this;
 
         context.fillStyle({ color: '#d42' });
 
@@ -96,6 +97,10 @@ class Bar {
 
 }
 
-export default function createBarGroup(options: BarGroupOptions = {}) {
-    return new BarGroup(options);
+export default function createBarGroup(
+    data: Object[],
+    scales: BarScales,
+    options: BarOptions = {}) {
+
+    return new BarGroup(data, scales, options);
 }

@@ -1,4 +1,5 @@
-import Graphics from './context';
+import { DrawingContext, PathCommand } from './context';
+import Style from './style';
 
 const svgNS = 'http://www.w3.org/2000/svg';
 
@@ -17,7 +18,7 @@ const setSvgAttrs = (node: SVGElement, attrs: { [attr: string]: string | number 
     }
 };
 
-export default class SvgContext implements Graphics.DrawingContext {
+export default class SvgContext implements DrawingContext {
 
     private _svg: SVGSVGElement;
     private _currentNode: SVGElement;
@@ -31,7 +32,7 @@ export default class SvgContext implements Graphics.DrawingContext {
         this._textStyle = {};
     }
 
-    path(commands: Graphics.PathCommand[]) {
+    path(commands: PathCommand[]) {
         var path = commands.map((c) => {
             switch (c.type) {
                 case 'M':
@@ -64,12 +65,12 @@ export default class SvgContext implements Graphics.DrawingContext {
         return this;
     }
 
-    private _strokeStyle: Graphics.StrokeStyle;
-    strokeStyle(style: Graphics.StrokeStyle) {
+    private _strokeStyle: Style.StrokeStyle;
+    strokeStyle(style: Style.StrokeStyle) {
         this._strokeStyle = Object.assign(this._strokeStyle, style);
         return this;
     }
-    stroke(style?: Graphics.StrokeStyle) {
+    stroke(style?: Style.StrokeStyle) {
         if (style) {
             this.strokeStyle(style);
         }
@@ -87,12 +88,12 @@ export default class SvgContext implements Graphics.DrawingContext {
         return this;
     }
 
-    private _fillStyle: Graphics.FillStyle;
-    fillStyle(style: Graphics.FillStyle) {
+    private _fillStyle: Style.FillStyle;
+    fillStyle(style: Style.FillStyle) {
         this._fillStyle = Object.assign(this._fillStyle, style);
         return this;
     }
-    fill(style?: Graphics.FillStyle) {
+    fill(style?: Style.FillStyle) {
         if (style) {
             this.fillStyle(style);
         }
@@ -107,12 +108,12 @@ export default class SvgContext implements Graphics.DrawingContext {
         return this;
     }
 
-    private _textStyle: Graphics.TextStyle;
-    textStyle(style: Graphics.TextStyle) {
+    private _textStyle: Style.TextStyle;
+    textStyle(style: Style.TextStyle) {
         this._textStyle = Object.assign(this._textStyle, style);
         return this;
     }
-    text(x: number, y: number, text: string, style?: Graphics.TextStyle) {
+    text(x: number, y: number, text: string, style?: Style.TextStyle) {
         if (style) {
             this.textStyle(style);
         }
