@@ -1,1 +1,1 @@
-import Graphics from './context';
+import { Context } from './context';

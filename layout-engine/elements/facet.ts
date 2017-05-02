@@ -1,10 +1,10 @@
-import { CartesianElement, CartesianSpace } from './cartesian';
-import { DrawingContext } from '../graphics/context';
-import { OrdinalScale, Scale, ScaleType, ScaleModel } from '../scales/scale';
+import { Element, Space } from './element';
+import { Context } from '../graphics/context';
+import { OrdinalScale, ScaleType, ScaleModel } from '../scales/scale';
 
 export interface FacetOptions {
-    padding?: number,
-    matrix?: [CartesianElement[]]
+    padding?: number;
+    matrix?: [Element[]];
 }
 
 const defaultFacetOptions: FacetOptions = {
@@ -13,35 +13,35 @@ const defaultFacetOptions: FacetOptions = {
 };
 
 type FacetScales = ScaleModel & {
-    x: OrdinalScale<any, number>,
-    y: OrdinalScale<any, number>
+    x: OrdinalScale<any, number>;
+    y: OrdinalScale<any, number>;
 };
 
-class FacetContainer implements CartesianElement {
+class FacetContainer implements Element {
 
-    private _options: FacetOptions;
     data: Object[];
     scales: FacetScales;
-    children: CartesianElement[];
+    options: FacetOptions;
+    children: Element[];
 
     constructor(
         data: Object[],
         scales: FacetScales,
-        children: CartesianElement[],
-        options: FacetOptions) {
+        options: FacetOptions,
+        children: Element[]) {
 
         this.data = data;
         this.scales = scales;
         this.children = children;
-        this._options = Object.assign({},
+        this.options = Object.assign({},
             defaultFacetOptions,
             options);
     }
 
-    getRequiredSpace(awailableSpace?: CartesianSpace) {
+    getRequiredSpace(awailableSpace?: Space): Space {
 
         const { children, scales } = this;
-        const options = this._options;
+        const options = this.options;
 
         if (children.length === 0) {
             return {
@@ -81,9 +81,9 @@ class FacetContainer implements CartesianElement {
         };
     }
 
-    draw(context: DrawingContext) {
+    draw(context: Context) {
 
-        
+
 
     }
 
@@ -92,8 +92,8 @@ class FacetContainer implements CartesianElement {
 export default function createFacetContainer(
     data: Object[],
     scales: FacetScales,
-    children: CartesianElement[],
-    options: FacetOptions) {
+    options: FacetOptions,
+    children: Element[]) {
 
-    return new FacetContainer(data, scales, children, options);
+    return new FacetContainer(data, scales, options, children);
 }

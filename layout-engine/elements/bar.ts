@@ -1,12 +1,12 @@
-import { CartesianElement, CartesianSpace } from './cartesian';
-import { DrawingContext } from '../graphics/context';
+import { Element, Space } from './element';
+import { Context } from '../graphics/context';
 import { Scale, ScaleType, ScaleModel } from '../scales/scale';
 
 export interface BarOptions {
-    flip?: boolean,
-    minHeight?: number,
-    minWidth?: number,
-    padding?: number
+    flip?: boolean;
+    minHeight?: number;
+    minWidth?: number;
+    padding?: number;
 }
 
 const defaultBarOptions: BarOptions = {
@@ -16,29 +16,32 @@ const defaultBarOptions: BarOptions = {
     padding: 0.25
 };
 
-type BarScales = ScaleModel & {
-    x: Scale<any, number>,
-    y: Scale<any, number>
+export type BarScales = ScaleModel & {
+    x: Scale<any, number>;
+    y: Scale<any, number>;
 };
 
-class BarGroup implements CartesianElement {
+class BarGroup implements Element {
 
-    private _options: BarOptions;
     data: Object[];
     scales: BarScales;
+    options: BarOptions;
 
     constructor(
         data: Object[],
         scales: BarScales,
         options: BarOptions) {
-        this._options = Object.assign({},
+
+        this.data = data;
+        this.scales = scales;
+        this.options = Object.assign({},
             defaultBarOptions,
             options);
     }
 
-    getRequiredSpace(awailableSpace?: CartesianSpace): CartesianSpace {
+    getRequiredSpace(awailableSpace?: Space): Space {
 
-        const s = this._options;
+        const opt = this.options;
         const { data, scales } = this;
 
         const count = data.length;
@@ -49,17 +52,17 @@ class BarGroup implements CartesianElement {
             };
         }
 
-        const barWidth = s.minWidth;
+        const barWidth = opt.minWidth;
 
         const stakes: [number, number] = [
-            count * barWidth + (count - 1) * s.padding * barWidth,
-            s.minHeight
+            count * barWidth + (count - 1) * opt.padding * barWidth,
+            opt.minHeight
         ];
         const bounds: [number, number] = [
             stakes[0],
             stakes[1] + scales.x.type === ScaleType.Continuous ? barWidth : 0
         ];
-        if (s.flip) {
+        if (opt.flip) {
             stakes.reverse();
             bounds.reverse();
         }
@@ -70,7 +73,7 @@ class BarGroup implements CartesianElement {
         };
     }
 
-    draw(context: DrawingContext) {
+    draw(context: Context) {
 
         const { data, scales } = this;
 
@@ -80,7 +83,7 @@ class BarGroup implements CartesianElement {
             const x = scales.x.from(d);
             const y = scales.y.from(d);
             const y0 = scales.y.value(0);
-            const w = this._options.minWidth;
+            const w = this.options.minWidth;
             const x0 = x - w / 2;
             const h = Math.abs(y - y0);
 

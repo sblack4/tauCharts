@@ -1,52 +1,36 @@
-import { Element } from './element';
-import { DrawingContext } from '../graphics/context';
-import { Scale, ScaleModel } from '../scales/scale'
+import { Element, Space } from './element';
+import { Context } from '../graphics/context';
+import { Scale, ScaleModel } from '../scales/scale';
 
-export interface CartesianElement extends Element {
-
-    data: Object[],
-    scales: { [model: string]: Scale<any, any> },
-    children?: CartesianElement[],
-
-    getRequiredSpace(awailableSpace?: CartesianSpace): CartesianSpace;
-    draw(context: DrawingContext): void;
-
-}
-
-export interface CartesianSpace {
-    stakes: [[number, number], [number, number]],
-    bounds: [[number, number], [number, number]]
-}
-
-export interface CartesianContainerOptions {
+export interface CartesianOptions {
     viewport?: [number, number]
 }
 
-type CartesianScales = ScaleModel & {
-    x: Scale<any, number>,
-    y: Scale<any, number>
+export type CartesianScales = ScaleModel & {
+    x: Scale<any, number>;
+    y: Scale<any, number>;
 };
 
-class CartesianContainer implements CartesianElement {
+class CartesianContainer implements Element {
 
-    private _options: CartesianContainerOptions;
     data: Object[];
     scales: CartesianScales;
-    children: CartesianElement[];
+    options: CartesianOptions;
+    children: Element[];
 
     constructor(
         data: Object[],
         scales: CartesianScales,
-        children: CartesianElement[],
-        options: CartesianContainerOptions) {
+        options: CartesianOptions,
+        children: Element[]) {
 
         this.data = data;
         this.scales = scales;
+        this.options = options;
         this.children = children;
-        this._options = options;
     }
 
-    getRequiredSpace(awailableSpace?: CartesianSpace): CartesianSpace {
+    getRequiredSpace(awailableSpace?: Space): Space {
 
         const { children } = this;
 
@@ -83,7 +67,7 @@ class CartesianContainer implements CartesianElement {
         }
     }
 
-    draw(context: DrawingContext) {
+    draw(context: Context) {
         const { children } = this;
         children.forEach((c) => c.draw(context));
     }
@@ -93,8 +77,8 @@ class CartesianContainer implements CartesianElement {
 export default function createCartesianContainer(
     data: Object[],
     scales: CartesianScales,
-    children: CartesianElement[],
-    options: CartesianContainerOptions) {
+    options: CartesianOptions,
+    children: Element[]) {
 
-    return new CartesianContainer(data, scales, children, options);
+    return new CartesianContainer(data, scales, options, children);
 }

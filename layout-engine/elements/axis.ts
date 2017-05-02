@@ -1,18 +1,18 @@
-import { CartesianElement, CartesianSpace } from './cartesian';
-import { DrawingContext } from '../graphics/context';
+import { Element, Space } from './element';
+import { Context } from '../graphics/context';
 import { TextStyle } from '../graphics/style';
 import { Scale, ScaleType, ScaleModel } from '../scales/scale';
 import { measureText } from '../graphics/text';
 import d3 from 'd3';
 
 export interface AxisOptions {
-    label?: string,
-    anchorPadding?: number,
-    tickLength?: number,
-    textPadding?: number,
-    labelPadding?: number,
-    textStyle?: TextStyle,
-    labelStyle?: TextStyle
+    label?: string;
+    anchorPadding?: number;
+    tickLength?: number;
+    textPadding?: number;
+    labelPadding?: number;
+    textStyle?: TextStyle;
+    labelStyle?: TextStyle;
 }
 
 const defaultAxisOptions: AxisOptions = {
@@ -60,15 +60,15 @@ function deepAssign<
 }
 
 type AxisScales = ScaleModel & {
-    x: Scale<any, number>,
-    y: Scale<any, number>
+    x: Scale<any, number>;
+    y: Scale<any, number>;
 };
 
-class AxisBottom implements CartesianElement {
+class AxisBottom implements Element {
 
-    private _options: AxisOptions;
     data: Object[];
     scales: AxisScales;
+    options: AxisOptions;
 
     constructor(
         data: Object[],
@@ -77,12 +77,12 @@ class AxisBottom implements CartesianElement {
 
         this.data = data;
         this.scales = scales;
-        this._options = deepAssign({},
+        this.options = deepAssign({},
             defaultAxisOptions,
             options);
     }
 
-    getRequiredSpace(awailableSpace?: CartesianSpace): CartesianSpace {
+    getRequiredSpace(awailableSpace?: Space): Space {
 
         const s = this._getLayout();
 
@@ -95,7 +95,7 @@ class AxisBottom implements CartesianElement {
         const bh = s.apad
             + s.line
             + s.tpad * 2 + s.tsize.height
-            + (this._options.label ? s.lpad * 2 + s.lsize.height : 0);
+            + (this.options.label ? s.lpad * 2 + s.lsize.height : 0);
 
         return {
             stakes: [[-sw / 2, 0], [sw / 2, sh]],
@@ -103,7 +103,7 @@ class AxisBottom implements CartesianElement {
         };
     }
 
-    draw(context: DrawingContext) {
+    draw(context: Context) {
 
         const { scales } = this;
 
@@ -130,15 +130,15 @@ class AxisBottom implements CartesianElement {
 
         context
             .fillStyle({ color: '#222' })
-            .textStyle(this._options.textStyle);
+            .textStyle(this.options.textStyle);
         ticks.forEach((t) => context
             .text(scales.x.value(t), y0 + s.line + s.tpad, String(t))
             .fill());
 
-        if (this._options.label) {
+        if (this.options.label) {
             context
-                .textStyle(this._options.labelStyle)
-                .text((x0 + x1) / 2, y0 + s.line + s.tpad * 2 + s.tsize.height + s.lpad, this._options.label)
+                .textStyle(this.options.labelStyle)
+                .text((x0 + x1) / 2, y0 + s.line + s.tpad * 2 + s.tsize.height + s.lpad, this.options.label)
                 .fill();
         }
     }
@@ -155,7 +155,7 @@ class AxisBottom implements CartesianElement {
             labelStyle,
             tickLength,
             anchorPadding
-         } = this._options;
+         } = this.options;
 
         const ticksSizes = scales.x.domain()
             .map((d) => String(d)) // Todo: Format.
@@ -185,7 +185,7 @@ class AxisBottom implements CartesianElement {
 export function createAxisBottom(
     data: Object[],
     scales: AxisScales,
-    options: AxisOptions) {
+    options: AxisOptions = {}) {
 
     return new AxisBottom(data, scales, options);
 }

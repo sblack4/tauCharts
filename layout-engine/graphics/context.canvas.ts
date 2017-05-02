@@ -1,7 +1,7 @@
-import { DrawingContext, PathCommand } from './context';
+import { Context, PathCommand } from './context';
 import Style from './style';
 
-export default class CanvasContext implements DrawingContext {
+export default class CanvasContext implements Context {
 
     private _context: CanvasRenderingContext2D;
     private _currentType: 'path' | 'rect' | 'text';

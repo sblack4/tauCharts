@@ -1,1 +1,1 @@
-import { CartesianElement } from './cartesian';
+import { Element, Space } from './element';

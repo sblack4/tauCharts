@@ -1,4 +1,4 @@
-import { DrawingContext } from '../graphics/context';
+import { Context } from '../graphics/context';
 import CanvasContext from '../graphics/context.canvas';
 import SvgContext from '../graphics/context.svg';
 import d3 from 'd3';
@@ -13,7 +13,7 @@ import createCartesianContainer from '../elements/cartesian';
 //
 // Sample drawing
 
-function drawImage(context: DrawingContext) {
+function drawImage(context: Context) {
     context.fillStyle({ color: '#d42' });
     context.strokeStyle({ color: '#24d', width: 4 });
 
@@ -68,16 +68,16 @@ var scales = {
         .range([20, 80])
 };
 
-var bars = createBarGroup();
-bars.draw(canvasContext, { data, scales });
+var bars = createBarGroup(data, scales);
+bars.draw(canvasContext);
 
 //
 // Sample axis
 
-var axis = createAxisBottom({
+var axis = createAxisBottom(data, scales, {
     label: 'Label'
 });
-axis.draw(canvasContext, { data, scales });
+axis.draw(canvasContext);
 
 //
 // Sample cartesian container
@@ -87,16 +87,14 @@ var scales = {
     y: createLinearScale(data, 'effort', { includeZero: true })
 };
 
-var cartesian = createCartesianContainer({
-    children: [
-        createBarGroup(),
-        createAxisBottom()
-    ]
-});
+var cartesian = createCartesianContainer(data, scales, {}, [
+    createBarGroup(data, scales),
+    createAxisBottom(data, scales)
+]);
 var dx = 200;
 var dy = 50;
-var space = cartesian.getRequiredSpace({ data, scales: scales, ratio: [1, 1] });
+var space = cartesian.getRequiredSpace();
 scales.x.range([space.stakes[0][0] + dx, space.stakes[1][0] + dx]);
 scales.y.range([space.stakes[0][1] + dy, space.stakes[1][1] + dy]);
-cartesian.draw(canvasContext, { data, scales });
-cartesian.draw(svgContext, { data, scales });
+cartesian.draw(canvasContext);
+cartesian.draw(svgContext);

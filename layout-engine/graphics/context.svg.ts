@@ -1,4 +1,4 @@
-import { DrawingContext, PathCommand } from './context';
+import { Context, PathCommand } from './context';
 import Style from './style';
 
 const svgNS = 'http://www.w3.org/2000/svg';
@@ -18,7 +18,7 @@ const setSvgAttrs = (node: SVGElement, attrs: { [attr: string]: string | number 
     }
 };
 
-export default class SvgContext implements DrawingContext {
+export default class SvgContext implements Context {
 
     private _svg: SVGSVGElement;
     private _currentNode: SVGElement;

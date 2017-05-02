@@ -1,4 +1,4 @@
-import { TextStyle } from './context';
+import { TextStyle } from './style';
 
 // Todo: Maybe this should be resolved by context (ctx.measureText(), text.getBBox()).
 // Or maybe should be computed by Opentype.js
