@@ -21,15 +21,32 @@ const setSvgAttrs = (node: SVGElement, attrs: { [attr: string]: string | number 
 export default class SvgContext implements Context {
 
     private _svg: SVGSVGElement;
-    private _currentNode: SVGElement;
+    private _group: SVGElement; // Todo: Group elements by style and transform.
+    private _element: SVGElement;
+    private _translate: [number, number];
 
     constructor(svg: SVGSVGElement) {
         this._svg = svg;
-        this._currentNode = null;
+        this._group = svg;
+        this._element = null;
 
         this._strokeStyle = {};
         this._fillStyle = {};
         this._textStyle = {};
+    }
+
+    translate(x, y) {
+        this._translate = [x, y];
+    }
+    resetTransform() {
+        this._translate = null;
+    }
+    private _setTransform(node: SVGElement) {
+        if (this._translate) {
+            setSvgAttrs(node, {
+                'transform': `translate(${this._translate[0]},${this._translate[1]})`
+            });
+        }
     }
 
     path(commands: PathCommand[]) {
@@ -47,21 +64,25 @@ export default class SvgContext implements Context {
                     return `Z`;
             }
         }).join(' ');
-        this._currentNode = createSvgElement(this._svg, 'path', {
+        this._element = createSvgElement(this._group, 'path', {
             'd': path
         });
+        this._setTransform(this._element);
         return this;
     }
     line(x1: number, y1: number, x2: number, y2: number) {
-        this._currentNode = createSvgElement(this._svg, 'line', { x1, y1, x2, y2 });
+        this._element = createSvgElement(this._group, 'line', { x1, y1, x2, y2 });
+        this._setTransform(this._element);
         return this;
     }
     rect(x: number, y: number, width: number, height: number) {
-        this._currentNode = createSvgElement(this._svg, 'rect', { x, y, width, height });
+        this._element = createSvgElement(this._group, 'rect', { x, y, width, height });
+        this._setTransform(this._element);
         return this;
     }
     circle(cx: number, cy: number, r: number) {
-        this._currentNode = createSvgElement(this._svg, 'circle', { cx, cy, r });
+        this._element = createSvgElement(this._group, 'circle', { cx, cy, r });
+        this._setTransform(this._element);
         return this;
     }
 
@@ -75,7 +96,7 @@ export default class SvgContext implements Context {
             this.strokeStyle(style);
         }
         const s = this._strokeStyle;
-        const n = this._currentNode;
+        const n = this._element;
         setSvgAttrs(n, {
             'stroke': s.color,
             'stroke-width': s.width
@@ -98,7 +119,7 @@ export default class SvgContext implements Context {
             this.fillStyle(style);
         }
         const f = this._fillStyle;
-        setSvgAttrs(this._currentNode, {
+        setSvgAttrs(this._element, {
             'fill': f.color,
             'fill-rule': f.fillRule
         });
@@ -118,7 +139,7 @@ export default class SvgContext implements Context {
             this.textStyle(style);
         }
         const t = this._textStyle;
-        this._currentNode = createSvgElement(this._svg, 'text', {
+        this._element = createSvgElement(this._group, 'text', {
             x, y,
             'text-anchor': t.anchor,
             'dominant-baseline': ({
@@ -131,7 +152,8 @@ export default class SvgContext implements Context {
             'font-style': t.style,
             'font-weight': t.weight
         });
-        this._currentNode.textContent = text; // Todo: Multiline text.
+        this._setTransform(this._element);
+        this._element.textContent = text; // Todo: Multiline text.
         return this;
     }
 

@@ -1,6 +1,6 @@
 import { Element, Space } from './element';
 import { Context } from '../graphics/context';
-import { Scale, ScaleType, ScaleModel } from '../scales/scale';
+import { Scale, ScaleType, ScaleModel, OrdinalScale } from '../scales/scale';
 
 export interface BarOptions {
     flip?: boolean;
@@ -58,24 +58,23 @@ class BarGroup implements Element {
             count * barWidth + (count - 1) * opt.padding * barWidth,
             opt.minHeight
         ];
-        const bounds: [number, number] = [
-            stakes[0],
-            stakes[1] + scales.x.type === ScaleType.Continuous ? barWidth : 0
-        ];
+        const b0: [number, number] = [-barWidth / 2, 0];
+        const b1: [number, number] = [stakes[0] + barWidth / 2, stakes[1]];
         if (opt.flip) {
             stakes.reverse();
-            bounds.reverse();
+            b0.reverse();
+            b1.reverse();
         }
 
         return {
             stakes: [[0, 0], stakes],
-            bounds: [[0, 0], bounds]
+            bounds: [b0, b1]
         };
     }
 
     draw(context: Context) {
 
-        const { data, scales } = this;
+        const { data, scales, options } = this;
 
         context.fillStyle({ color: '#d42' });
 
@@ -83,7 +82,9 @@ class BarGroup implements Element {
             const x = scales.x.from(d);
             const y = scales.y.from(d);
             const y0 = scales.y.value(0);
-            const w = this.options.minWidth;
+            const w = scales.x.type === ScaleType.Ordinal ?
+                (scales.x as OrdinalScale<any, number>).stepSize() * (1 - options.padding) :
+                options.minWidth;
             const x0 = x - w / 2;
             const h = Math.abs(y - y0);
 

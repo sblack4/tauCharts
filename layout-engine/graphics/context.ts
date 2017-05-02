@@ -2,6 +2,9 @@ import Style from './style';
 
 export interface Context {
 
+    translate(x: number, y: number);
+    resetTransform();
+
     path(commands: PathCommand[]): this;
     line(x1: number, y1: number, x2: number, y2: number): this;
     rect(x: number, y: number, width: number, height: number): this;

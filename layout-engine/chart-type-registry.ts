@@ -1,34 +1,22 @@
 export interface ChartSpec {
-    type: string,
-    data: Array<Object>
+    type: string;
+    data: Array<Object>;
 }
 
 export interface CartesianChartSpec {
-    type: string,
-    x: string | Array<string>,
-    y: string | Array<string>
+    type: string;
+    x: string | Array<string>;
+    y: string | Array<string>;
 }
 
 export interface BarChartSpec extends CartesianChartSpec {
-    type: 'bar',
-    flip: boolean,
-    x0?: string | Array<string>,
-    y0?: string | Array<string>
+    type: 'bar';
+    flip: boolean;
+    x0?: string | Array<string>;
+    y0?: string | Array<string>;
 }
 
 export interface LineChartSpec extends CartesianChartSpec {
-    type: 'line',
-    flip: boolean
+    type: 'line';
+    flip: boolean;
 }
-
-// const chartTypes={
-
-// };
-
-// export const ChartTypeRegistry = {
-
-//     get(){
-
-//     }
-
-// };

@@ -1,14 +1,14 @@
 import { Context } from '../graphics/context';
 import CanvasContext from '../graphics/context.canvas';
 import SvgContext from '../graphics/context.svg';
-import d3 from 'd3';
 
 import createLinearScale from '../scales/linear';
+import createOrdinalScale from '../scales/ordinal';
+
 import createBarGroup from '../elements/bar';
-
 import { createAxisBottom } from '../elements/axis';
-
 import createCartesianContainer from '../elements/cartesian';
+import createFacetContainer from '../elements/facet';
 
 //
 // Sample drawing
@@ -98,3 +98,71 @@ scales.x.range([space.stakes[0][0] + dx, space.stakes[1][0] + dx]);
 scales.y.range([space.stakes[0][1] + dy, space.stakes[1][1] + dy]);
 cartesian.draw(canvasContext);
 cartesian.draw(svgContext);
+
+//
+// Sample facet
+
+var fullData = [
+    { effort: 50, count: 100, team: 'Alpha' },
+    { effort: 10, count: 20, team: 'Alpha' },
+    { effort: 40, count: 40, team: 'Alpha' },
+    { effort: 30, count: 100, team: 'Beta' },
+    { effort: 20, count: 20, team: 'Beta' },
+    { effort: 40, count: 40, team: 'Beta' }
+];
+
+var groupByTeam = (() => {
+    var teams: { [t: string]: any[] } = {};
+    fullData.forEach((d) => {
+        teams[d.team] = teams[d.team] || [];
+        teams[d.team].push(d);
+    });
+    return Object.keys(teams).map((t) => teams[t]);
+})();
+
+var teamScale = createOrdinalScale(fullData, 'team', { sorter: 'string' });
+var effortScale = createLinearScale(fullData, 'effort');
+var countScale = createLinearScale(fullData, 'count', { includeZero: true });
+var cartesianScales = {
+    x: countScale,
+    y: effortScale
+};
+var facetScales = {
+    x: teamScale,
+    y: effortScale
+};
+
+var facet = createCartesianContainer(fullData, facetScales, {}, [
+    createAxisBottom(fullData, facetScales),
+    createFacetContainer(
+        groupByTeam,
+        {
+            x: teamScale
+        },
+        {},
+        [
+            createCartesianContainer(
+                groupByTeam[0],
+                cartesianScales,
+                {},
+                [
+                    createBarGroup(groupByTeam[0], cartesianScales),
+                    createAxisBottom(fullData, cartesianScales)
+                ]),
+            createCartesianContainer(
+                groupByTeam[1],
+                cartesianScales,
+                {},
+                [
+                    createBarGroup(groupByTeam[1], cartesianScales),
+                    createAxisBottom(fullData, cartesianScales)
+                ])
+        ]
+    )
+]);
+
+effortScale.range([0, 50]);
+countScale.range([0, 50]);
+teamScale.range([200, 400]);
+
+facet.draw(svgContext);

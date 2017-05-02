@@ -4,28 +4,26 @@ import { OrdinalScale, ScaleType, ScaleModel } from '../scales/scale';
 
 export interface FacetOptions {
     padding?: number;
-    matrix?: [Element[]];
 }
 
 const defaultFacetOptions: FacetOptions = {
-    padding: 16,
-    matrix: [[]]
+    padding: 16
 };
 
 type FacetScales = ScaleModel & {
-    x: OrdinalScale<any, number>;
-    y: OrdinalScale<any, number>;
+    x?: OrdinalScale<Object[], number>;
+    y?: OrdinalScale<Object[], number>;
 };
 
 class FacetContainer implements Element {
 
-    data: Object[];
+    data: Object[][];
     scales: FacetScales;
     options: FacetOptions;
     children: Element[];
 
     constructor(
-        data: Object[],
+        data: Object[][],
         scales: FacetScales,
         options: FacetOptions,
         children: Element[]) {
@@ -83,14 +81,28 @@ class FacetContainer implements Element {
 
     draw(context: Context) {
 
+        const { scales } = this;
+        const dx = scales.x ? -scales.x.stepSize() / 2 : 0;
+        const dy = scales.y ? -scales.y.stepSize() / 2 : 0;
 
+        this.children.forEach((c) => {
+            const d = c.data[0];
+            const x = scales.x ? scales.x.from(d) : 0;
+            const y = scales.y ? scales.y.from(d) : 0;
+
+            context.translate(x + dx, y + dy);
+
+            c.draw(context);
+
+            context.resetTransform();
+        });
 
     }
 
 }
 
 export default function createFacetContainer(
-    data: Object[],
+    data: Object[][],
     scales: FacetScales,
     options: FacetOptions,
     children: Element[]) {

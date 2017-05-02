@@ -1,4 +1,4 @@
-import { ScaleType, Scale, ScaleFactory } from './scale';
+import { ScaleType, ContinuousScale } from './scale';
 import { scaleLinear, ScaleLinear } from 'd3';
 
 interface LinearScaleOptions {
@@ -11,12 +11,12 @@ const defaultLinearScaleOptions: LinearScaleOptions = {
     includeZero: false
 };
 
-class LinearScale implements Scale<number, number>{
+class LinearScale implements ContinuousScale<number, number>{
 
-    type: string;
+    type: 'continuous';
     dimension: string;
-    aggregations: string[];
-    static aggregations = ['min', 'max'];
+    // aggregations: string[];
+    // static aggregations = ['min', 'max'];
     private _scale: ScaleLinear<number, number>;
     private _options: LinearScaleOptions;
 
@@ -26,7 +26,7 @@ class LinearScale implements Scale<number, number>{
         this._options = Object.assign({},
             defaultLinearScaleOptions,
             options);
-        this.aggregations = LinearScale.aggregations;
+        // this.aggregations = LinearScale.aggregations;
         this._scale = scaleLinear<number, number>();
         if (this._options.nice) {
             this._scale.nice();

@@ -3,6 +3,7 @@ import { Context } from '../graphics/context';
 import { TextStyle } from '../graphics/style';
 import { Scale, ScaleType, ScaleModel } from '../scales/scale';
 import { measureText } from '../graphics/text';
+import { deepAssign } from '../utils';
 import d3 from 'd3';
 
 export interface AxisOptions {
@@ -38,26 +39,6 @@ const defaultAxisOptions: AxisOptions = {
         baseline: 'hanging'
     }
 };
-
-function deepAssign<
-    A extends Object,
-    B extends Object,
-    C extends Object,
-    D extends Object,
-    E extends Object>
-    (a: A, b?: B, c?: C, d?: D, e?: E): A & B & C & D & E {
-    const objects: Object[] = Array.from(arguments).filter((obj) => obj);
-    var result: Object = Object.assign.apply(null, objects);
-    for (var prop in result) {
-        if (typeof result[prop] === 'object' && result[prop] !== null) {
-            let objProps = objects
-                .filter((obj) => typeof obj[prop] === 'object')
-                .map((obj) => obj[prop]);
-            result[prop] = deepAssign.apply(null, objProps);
-        }
-    }
-    return result as A & B & C & D & E;
-}
 
 type AxisScales = ScaleModel & {
     x: Scale<any, number>;
