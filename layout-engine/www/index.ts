@@ -92,7 +92,7 @@ var cartesian = createCartesianContainer(data, scales, {}, [
     createAxisBottom(data, scales)
 ]);
 var dx = 200;
-var dy = 50;
+var dy = 250;
 var space = cartesian.getRequiredSpace();
 scales.x.range([space.stakes[0][0] + dx, space.stakes[1][0] + dx]);
 scales.y.range([space.stakes[0][1] + dy, space.stakes[1][1] + dy]);
@@ -165,4 +165,5 @@ effortScale.range([0, 50]);
 countScale.range([0, 50]);
 teamScale.range([200, 400]);
 
+facet.draw(canvasContext);
 facet.draw(svgContext);

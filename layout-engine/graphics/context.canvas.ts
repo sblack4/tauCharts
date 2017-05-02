@@ -27,7 +27,7 @@ export default class CanvasContext implements Context {
         this._context.translate(x, y);
     }
     resetTransform() {
-        this._context.transform(1, 0, 0, 1, 0, 0);
+        this._context.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     path(commands: PathCommand[]) {
