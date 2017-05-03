@@ -1,4 +1,5 @@
 import { Element, Space } from './element';
+import { CartesianContainer } from './cartesian';
 import { Context } from '../graphics/context';
 import { OrdinalScale, ScaleType, ScaleModel } from '../scales/scale';
 
@@ -20,13 +21,13 @@ class FacetContainer implements Element {
     data: Object[][];
     scales: FacetScales;
     options: FacetOptions;
-    children: Element[];
+    children: CartesianContainer[];
 
     constructor(
         data: Object[][],
         scales: FacetScales,
         options: FacetOptions,
-        children: Element[]) {
+        children: CartesianContainer[]) {
 
         this.data = data;
         this.scales = scales;
@@ -61,8 +62,8 @@ class FacetContainer implements Element {
             height: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes[1][1] - stakes[0][1])))
         };
 
-        const xcount = scales.x.domain().length;
-        const ycount = scales.y.domain().length;
+        const xcount = scales.x ? scales.x.domain().length : 1;
+        const ycount = scales.y ? scales.y.domain().length : 1;
 
         const cellW = borders.left + stakes.width + borders.right;
         const cellH = borders.top + stakes.height + borders.bottom;
@@ -82,13 +83,18 @@ class FacetContainer implements Element {
     draw(context: Context) {
 
         const { scales } = this;
-        const dx = scales.x ? -scales.x.stepSize() / 2 : 0;
-        const dy = scales.y ? -scales.y.stepSize() / 2 : 0;
+        // const dx = scales.x ? -scales.x.stepSize() / 2 : 0;
+        // const dy = scales.y ? -scales.y.stepSize() / 2 : 0;
 
         this.children.forEach((c) => {
             const d = c.data[0];
             const x = scales.x ? scales.x.from(d) : 0;
             const y = scales.y ? scales.y.from(d) : 0;
+
+            const rangeX = c.scales.x.range();
+            const rangeY = c.scales.y.range();
+            const dx = scales.x ? - (rangeX[1] + rangeX[0]) / 2 : 0;
+            const dy = scales.y ? - (rangeY[1] + rangeY[0]) / 2 : 0;
 
             context.translate(x + dx, y + dy);
 
@@ -105,7 +111,7 @@ export default function createFacetContainer(
     data: Object[][],
     scales: FacetScales,
     options: FacetOptions,
-    children: Element[]) {
+    children: CartesianContainer[]) {
 
     return new FacetContainer(data, scales, options, children);
 }

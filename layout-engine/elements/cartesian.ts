@@ -3,7 +3,7 @@ import { Context } from '../graphics/context';
 import { Scale, ScaleModel } from '../scales/scale';
 
 export interface CartesianOptions {
-    viewport?: [number, number]
+    viewport?: [number, number];
 }
 
 export type CartesianScales = ScaleModel & {
@@ -11,7 +11,7 @@ export type CartesianScales = ScaleModel & {
     y: Scale<any, number>;
 };
 
-class CartesianContainer implements Element {
+export class CartesianContainer implements Element {
 
     data: Object[];
     scales: CartesianScales;

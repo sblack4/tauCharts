@@ -6,7 +6,7 @@ import createLinearScale from '../scales/linear';
 import createOrdinalScale from '../scales/ordinal';
 
 import createBarGroup from '../elements/bar';
-import { createAxisBottom } from '../elements/axis';
+import { createAxisBottom, createAxisLeft } from '../elements/axis';
 import createCartesianContainer from '../elements/cartesian';
 import createFacetContainer from '../elements/facet';
 
@@ -123,13 +123,14 @@ var groupByTeam = (() => {
 var teamScale = createOrdinalScale(fullData, 'team', { sorter: 'string' });
 var effortScale = createLinearScale(fullData, 'effort');
 var countScale = createLinearScale(fullData, 'count', { includeZero: true });
+var facetYScale = createLinearScale([{ value: 0 }, { value: 1 }], 'value');
 var cartesianScales = {
     x: countScale,
     y: effortScale
 };
 var facetScales = {
     x: teamScale,
-    y: effortScale
+    y: facetYScale
 };
 
 var facet = createCartesianContainer(fullData, facetScales, {}, [
@@ -147,7 +148,8 @@ var facet = createCartesianContainer(fullData, facetScales, {}, [
                 {},
                 [
                     createBarGroup(groupByTeam[0], cartesianScales),
-                    createAxisBottom(fullData, cartesianScales)
+                    createAxisBottom(fullData, cartesianScales),
+                    createAxisLeft(fullData, cartesianScales),
                 ]),
             createCartesianContainer(
                 groupByTeam[1],
@@ -161,8 +163,12 @@ var facet = createCartesianContainer(fullData, facetScales, {}, [
     )
 ]);
 
-effortScale.range([0, 50]);
-countScale.range([0, 50]);
+var requiredSpace = facet.getRequiredSpace();
+console.log('facet required', requiredSpace);
+
+facetYScale.range([0, 100]);
+effortScale.range([0, 60]);
+countScale.range([0, 75]);
 teamScale.range([200, 400]);
 
 facet.draw(canvasContext);
