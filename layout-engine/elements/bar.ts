@@ -1,4 +1,5 @@
-import { Element, Space } from './element';
+import { Element } from './element';
+import { Space, emptySpace } from './space';
 import { Context } from '../graphics/context';
 import { Scale, ScaleType, ScaleModel, OrdinalScale } from '../scales/scale';
 
@@ -46,10 +47,7 @@ class BarGroup implements Element {
 
         const count = data.length;
         if (count === 0) {
-            return {
-                stakes: [[0, 0], [0, 0]],
-                bounds: [[0, 0], [0, 0]]
-            };
+            return emptySpace();
         }
 
         const barWidth = opt.minWidth;
@@ -67,8 +65,18 @@ class BarGroup implements Element {
         }
 
         return {
-            stakes: [[0, 0], stakes],
-            bounds: [b0, b1]
+            stakes: {
+                top: 0,
+                right: stakes[0],
+                bottom: stakes[1],
+                left: 0
+            },
+            bounds: {
+                top: b0[1],
+                right: b1[0],
+                bottom: b1[1],
+                left: b0[0]
+            }
         };
     }
 

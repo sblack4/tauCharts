@@ -1,4 +1,5 @@
-import { Element, Space } from './element';
+import { Element } from './element';
+import { Space, emptySpace, mergeSpace } from './space';
 import { CartesianContainer } from './cartesian';
 import { Context } from '../graphics/context';
 import { OrdinalScale, ScaleType, ScaleModel } from '../scales/scale';
@@ -43,23 +44,15 @@ class FacetContainer implements Element {
         const options = this.options;
 
         if (children.length === 0) {
-            return {
-                stakes: [[0, 0], [0, 0]],
-                bounds: [[0, 0], [0, 0]]
-            };
+            return emptySpace();
         }
 
         const spaces = children.map((c) => c.getRequiredSpace(awailableSpace));
-        const borders = {
-            left: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, stakes[0][0] - bounds[0][0]))),
-            right: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, bounds[1][0] - stakes[1][0]))),
-            top: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, stakes[0][1] - bounds[0][1]))),
-            bottom: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, bounds[1][1] - stakes[1][1]))),
-        };
-
+        const merged = mergeSpace(...spaces);
+        const borders = merged.bounds;
         const stakes = {
-            width: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes[1][0] - stakes[0][0]))),
-            height: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes[1][1] - stakes[0][1])))
+            width: merged.stakes.right - merged.stakes.left,
+            height: merged.stakes.bottom - merged.stakes.top
         };
 
         const xcount = scales.x ? scales.x.domain().length : 1;
@@ -69,14 +62,18 @@ class FacetContainer implements Element {
         const cellH = borders.top + stakes.height + borders.bottom;
 
         return {
-            stakes: [
-                [cellW / 2, cellH / 2],
-                [cellW * (xcount - 0.5) + options.padding * (xcount - 1), cellH * (ycount - 0.5) + options.padding * (ycount - 1)]
-            ],
-            bounds: [
-                [0, 0],
-                [cellW * xcount + options.padding * (xcount - 1), cellH * ycount + options.padding * (ycount - 1)]
-            ]
+            stakes: {
+                top: cellH / 2,
+                right: cellW * (xcount - 0.5) + options.padding * (xcount - 1),
+                bottom: cellH * (ycount - 0.5) + options.padding * (ycount - 1),
+                left: cellW / 2
+            },
+            bounds: {
+                top: 0,
+                right: cellW * xcount + options.padding * (xcount - 1),
+                bottom: cellH * ycount + options.padding * (ycount - 1),
+                left: 0
+            }
         };
     }
 

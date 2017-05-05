@@ -1,4 +1,5 @@
-import { Element, Space } from './element';
+import { Element } from './element';
+import { Space } from './space';
 import { Context } from '../graphics/context';
 import { TextStyle } from '../graphics/style';
 import { Scale, ScaleType, ScaleModel } from '../scales/scale';
@@ -99,8 +100,18 @@ class AxisBottom implements Element {
             + (this.options.label ? s.lpad * 2 + s.lsize.height : 0);
 
         return {
-            stakes: [[-sw / 2, 0], [sw / 2, sh]],
-            bounds: [[-bw / 2, 0], [bw / 2, bh]]
+            stakes: {
+                top: 0,
+                right: sw / 2,
+                bottom: sh,
+                left: -sw / 2
+            },
+            bounds: {
+                top: 0,
+                right: bw / 2,
+                bottom: bh,
+                left: -bw / 2
+            }
         };
     }
 
@@ -217,8 +228,18 @@ class AxisLeft implements Element {
             s.lsize.height + s.lpad * 2);
 
         return {
-            stakes: [[0, -sh / 2], [sw, sh / 2]],
-            bounds: [[0, -bh / 2], [bw, bh / 2]]
+            stakes: {
+                top: -sh / 2,
+                right: sw,
+                bottom: sh / 2,
+                left: 0
+            },
+            bounds: {
+                top: -bh / 2,
+                right: bw,
+                bottom: bh / 2,
+                left: 0
+            }
         };
     }
 

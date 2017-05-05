@@ -94,8 +94,8 @@ var cartesian = createCartesianContainer(data, scales, {}, [
 var dx = 200;
 var dy = 250;
 var space = cartesian.getRequiredSpace();
-scales.x.range([space.stakes[0][0] + dx, space.stakes[1][0] + dx]);
-scales.y.range([space.stakes[0][1] + dy, space.stakes[1][1] + dy]);
+scales.x.range([space.stakes.left + dx, space.stakes.right + dx]);
+scales.y.range([space.stakes.top + dy, space.stakes.bottom + dy]);
 cartesian.draw(canvasContext);
 cartesian.draw(svgContext);
 
@@ -103,12 +103,12 @@ cartesian.draw(svgContext);
 // Sample facet
 
 var fullData = [
-    { effort: 50, count: 100, team: 'Alpha' },
-    { effort: 10, count: 20, team: 'Alpha' },
-    { effort: 40, count: 40, team: 'Alpha' },
-    { effort: 30, count: 100, team: 'Beta' },
-    { effort: 20, count: 20, team: 'Beta' },
-    { effort: 40, count: 40, team: 'Beta' }
+    { effort: 50, count: 'a', team: 'Alpha' },
+    { effort: 10, count: 'b', team: 'Alpha' },
+    { effort: 40, count: 'c', team: 'Alpha' },
+    { effort: 30, count: 'a', team: 'Beta' },
+    { effort: 20, count: 'b', team: 'Beta' },
+    { effort: 40, count: 'c', team: 'Beta' }
 ];
 
 var groupByTeam = (() => {
@@ -121,8 +121,8 @@ var groupByTeam = (() => {
 })();
 
 var teamScale = createOrdinalScale(fullData, 'team', { sorter: 'string' });
-var effortScale = createLinearScale(fullData, 'effort');
-var countScale = createLinearScale(fullData, 'count', { includeZero: true });
+var effortScale = createLinearScale(fullData, 'effort', { includeZero: true });
+var countScale = createOrdinalScale(fullData, 'count');
 var facetYScale = createLinearScale([{ value: 0 }, { value: 1 }], 'value');
 var cartesianScales = {
     x: countScale,
@@ -149,7 +149,7 @@ var facet = createCartesianContainer(fullData, facetScales, {}, [
                 [
                     createBarGroup(groupByTeam[0], cartesianScales),
                     createAxisBottom(fullData, cartesianScales),
-                    createAxisLeft(fullData, cartesianScales),
+                    createAxisLeft(fullData, cartesianScales)
                 ]),
             createCartesianContainer(
                 groupByTeam[1],
@@ -167,7 +167,7 @@ var requiredSpace = facet.getRequiredSpace();
 console.log('facet required', requiredSpace);
 
 facetYScale.range([0, 100]);
-effortScale.range([0, 60]);
+effortScale.range([10, 60]);
 countScale.range([0, 75]);
 teamScale.range([200, 400]);
 

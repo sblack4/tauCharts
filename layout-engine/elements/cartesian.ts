@@ -1,6 +1,13 @@
-import { Element, Space } from './element';
+import { Element } from './element';
 import { Context } from '../graphics/context';
 import { Scale, ScaleModel } from '../scales/scale';
+import createRegistry from '../registry';
+import {
+    Space,
+    mergeSpace,
+    emptySpace,
+    moveBorders
+} from './space';
 
 export interface CartesianOptions {
     viewport?: [number, number];
@@ -35,36 +42,13 @@ export class CartesianContainer implements Element {
         const { children } = this;
 
         if (children.length === 0) {
-            return {
-                stakes: [[0, 0], [0, 0]],
-                bounds: [[0, 0], [0, 0]]
-            };
+            return emptySpace();
         }
 
         // Todo: This should be calculated multiple times with specified required/awailable ratio.
+        // Todo: Apply layout rules.
         const spaces = children.map((c) => c.getRequiredSpace(awailableSpace));
-        const borders = {
-            left: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, stakes[0][0] - bounds[0][0]))),
-            right: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, bounds[1][0] - stakes[1][0]))),
-            top: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, stakes[0][1] - bounds[0][1]))),
-            bottom: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, bounds[1][1] - stakes[1][1]))),
-        };
-
-        const stakes = {
-            width: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes[1][0] - stakes[0][0]))),
-            height: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes[1][1] - stakes[0][1])))
-        };
-
-        return {
-            stakes: [
-                [borders.left, borders.top],
-                [borders.left + stakes.width, borders.top + stakes.height]
-            ],
-            bounds: [
-                [0, 0],
-                [borders.left + stakes.width + borders.right, borders.top + stakes.height + borders.bottom]
-            ]
-        }
+        return mergeSpace(...spaces);
     }
 
     draw(context: Context) {
@@ -73,6 +57,26 @@ export class CartesianContainer implements Element {
     }
 
 }
+
+type LayoutRule = (space: Space, neighbors: Space) => Space;
+export const cartesianLayoutRules = createRegistry<LayoutRule>('Cartesian Layout Rules');
+cartesianLayoutRules.set('layered', (s) => s);
+cartesianLayoutRules.set('dock-left', (s, n) => {
+    const dx = Math.max(0, Math.min(n.bounds.left, n.stakes.left) - s.bounds.right);
+    return moveBorders(s, dx, 0);
+});
+cartesianLayoutRules.set('dock-right', (s, n) => {
+    const dx = Math.min(0, s.bounds.left - Math.max(n.bounds.right, n.stakes.right));
+    return moveBorders(s, dx, 0);
+});
+cartesianLayoutRules.set('dock-top', (s, n) => {
+    const dy = Math.max(0, Math.min(n.bounds.top, n.stakes.top) - s.bounds.bottom);
+    return moveBorders(s, 0, dy);
+});
+cartesianLayoutRules.set('dock-bottom', (s, n) => {
+    const dy = Math.min(0, s.bounds.top - Math.max(n.bounds.bottom, n.stakes.bottom));
+    return moveBorders(s, 0, dy);
+});
 
 export default function createCartesianContainer(
     data: Object[],

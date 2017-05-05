@@ -1,5 +1,6 @@
 import { Context } from '../graphics/context';
-import { ScaleModel } from '../scales/scale'
+import { ScaleModel } from '../scales/scale';
+import { Space } from './space';
 
 export interface Element {
 
@@ -11,9 +12,4 @@ export interface Element {
     getRequiredSpace(awailableSpace?: Space): Space;
     draw(context: Context, awailableSpace?: Space): void;
 
-}
-
-export interface Space {
-    stakes: [[number, number], [number, number]];
-    bounds: [[number, number], [number, number]];
 }
