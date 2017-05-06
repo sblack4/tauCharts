@@ -67,3 +67,42 @@ export function moveBorders(space: Space, dx: number, dy: number): Space {
         }
     };
 }
+
+export function alignSpaceBy(space: Space, target: Space): Space {
+    const left = space.stakes.left - space.bounds.left;
+    const right = space.stakes.right - space.bounds.right;
+    const top = space.stakes.top - space.bounds.top;
+    const bottom = space.stakes.bottom - space.bounds.bottom;
+
+    const width = Math.max(
+        space.stakes.right - space.stakes.left,
+        target.stakes.right - target.stakes.left);
+
+    const height = Math.max(
+        space.stakes.bottom - space.stakes.top,
+        target.stakes.bottom - target.stakes.top);
+
+    return {
+        stakes: {
+            top: top,
+            right: left + width,
+            bottom: top + height,
+            left: left
+        },
+        bounds: {
+            top: 0,
+            right: left + width + right,
+            bottom: top + height + bottom,
+            left: 0
+        }
+    };
+}
+
+export function overflowsSpace(space: Space, available: Space) {
+    const merged = mergeSpace(space, available);
+    const aligned = alignSpaceBy(available, merged);
+    return (
+        merged.bounds.right > available.bounds.right ||
+        merged.bounds.top > available.bounds.top
+    );
+}

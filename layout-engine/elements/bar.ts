@@ -40,7 +40,7 @@ class BarGroup implements Element {
             options);
     }
 
-    getRequiredSpace(awailableSpace?: Space): Space {
+    getRequiredSpace(availableSpace?: Space): Space {
 
         const opt = this.options;
         const { data, scales } = this;
@@ -80,11 +80,20 @@ class BarGroup implements Element {
         };
     }
 
-    draw(context: Context) {
+    draw(context: Context, available?: Space) {
 
         const { data, scales, options } = this;
 
+        if (data.length === 0) {
+            return emptySpace();
+        }
+
         context.fillStyle({ color: '#d42' });
+
+        var top = Number.MAX_VALUE;
+        var right = Number.MIN_VALUE;
+        var bottom = Number.MIN_VALUE;
+        var left = Number.MAX_VALUE;
 
         data.forEach((d) => {
             const x = scales.x.from(d);
@@ -96,10 +105,33 @@ class BarGroup implements Element {
             const x0 = x - w / 2;
             const h = Math.abs(y - y0);
 
+            top = Math.min(top, y0);
+            right = Math.max(right, x0 + w);
+            bottom = Math.max(bottom, y0 + h);
+            left = Math.min(left, x0);
+
             context
                 .rect(x0, y0, w, h)
                 .fill();
         });
+
+        const xRange = scales.x.range();
+        const yRange = scales.y.range();
+
+        return {
+            stakes: {
+                top: yRange[0],
+                right: xRange[1],
+                bottom: yRange[1],
+                left: xRange[0]
+            },
+            bounds: {
+                top,
+                right,
+                bottom,
+                left
+            }
+        };
 
     }
 

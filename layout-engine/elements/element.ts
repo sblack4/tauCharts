@@ -9,7 +9,7 @@ export interface Element {
     options: Object;
     children?: Element[];
 
-    getRequiredSpace(awailableSpace?: Space): Space;
-    draw(context: Context, awailableSpace?: Space): void;
+    getRequiredSpace(available?: Space, captured?: Space): Space;
+    draw(context: Context, available?: Space, captured?: Space): Space;
 
 }

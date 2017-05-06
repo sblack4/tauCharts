@@ -1,5 +1,5 @@
 import { Element } from './element';
-import { Space } from './space';
+import { Space, emptySpace, overflowsSpace } from './space';
 import { Context } from '../graphics/context';
 import { TextStyle } from '../graphics/style';
 import { Scale, ScaleType, ScaleModel } from '../scales/scale';
@@ -84,7 +84,7 @@ class AxisBottom implements Element {
             options);
     }
 
-    getRequiredSpace(awailableSpace?: Space): Space {
+    getRequiredSpace(available?: Space, captured?: Space): Space {
 
         const s = this._getLayout();
 
@@ -99,7 +99,7 @@ class AxisBottom implements Element {
             + s.tpad * 2 + s.tsize.height
             + (this.options.label ? s.lpad * 2 + s.lsize.height : 0);
 
-        return {
+        const space = {
             stakes: {
                 top: 0,
                 right: sw / 2,
@@ -113,9 +113,15 @@ class AxisBottom implements Element {
                 left: -bw / 2
             }
         };
+
+        // Todo: Shift considering captured space.
+        if (available && overflowsSpace(space, available)) {
+            return emptySpace();
+        }
+        return space;
     }
 
-    draw(context: Context) {
+    draw(context: Context, available?: Space, captured?: Space) {
 
         const { scales } = this;
 
@@ -153,6 +159,9 @@ class AxisBottom implements Element {
                 .text((x0 + x1) / 2, y0 + s.line + s.tpad * 2 + s.tsize.height + s.lpad, this.options.label)
                 .fill();
         }
+
+        // Todo: Calculate space.
+        return emptySpace();
     }
 
     private _getLayout() {
@@ -212,7 +221,7 @@ class AxisLeft implements Element {
             options);
     }
 
-    getRequiredSpace(awailableSpace?: Space): Space {
+    getRequiredSpace(available?: Space): Space {
 
         const s = this._getLayout();
 
@@ -243,7 +252,7 @@ class AxisLeft implements Element {
         };
     }
 
-    draw(context: Context) {
+    draw(context: Context, available?: Space): Space {
 
         const { scales } = this;
 
@@ -281,6 +290,9 @@ class AxisLeft implements Element {
                 .text(x0 - s.line - s.tpad * 2 - s.tsize.height - s.lpad, (y0 + y1) / 2, this.options.label)
                 .fill();
         }
+
+        // Todo: Calculate space.
+        return emptySpace();
     }
 
     private _getLayout() {
