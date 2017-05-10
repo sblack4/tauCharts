@@ -134,7 +134,6 @@ var facetScales = {
 };
 
 var facet = createCartesianContainer(fullData, facetScales, {}, [
-    createAxisBottom(fullData, facetScales),
     createFacetContainer(
         groupByTeam,
         {
@@ -160,7 +159,8 @@ var facet = createCartesianContainer(fullData, facetScales, {}, [
                     createAxisBottom(fullData, cartesianScales)
                 ])
         ]
-    )
+    ),
+    createAxisBottom(fullData, facetScales)
 ]);
 
 var requiredSpace = facet.getRequiredSpace();
@@ -173,3 +173,18 @@ teamScale.range([200, 400]);
 
 facet.draw(canvasContext);
 facet.draw(svgContext);
+
+var chartContainer = createCartesianContainer(data, scales, {}, [
+    createBarGroup(data, scales),
+    createAxisBottom(data, scales),
+    createAxisLeft(data, scales)
+]);
+console.log('chartContainer required', chartContainer.getRequiredSpace());
+console.log('chartContainer draw', chartContainer.draw(canvasContext, {
+    bounds: { left: 0, right: 200, top: 0, bottom: 200 },
+    stakes: { left: 0, right: 200, top: 0, bottom: 200 }
+}));
+console.log('chartContainer draw', chartContainer.draw(svgContext, {
+    bounds: { left: 0, right: 200, top: 0, bottom: 200 },
+    stakes: { left: 0, right: 200, top: 0, bottom: 200 }
+}));

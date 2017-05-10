@@ -42,7 +42,9 @@ export class CartesianContainer implements Element {
 
         this.data = data;
         this.scales = scales;
-        this.options = options;
+        this.options = Object.assign({},
+            defaultCartesianOptions,
+            options);
         this.children = children;
         // this.layoutRules = ['layered'];
     }
@@ -109,7 +111,7 @@ export class CartesianContainer implements Element {
             var height = s.stakes.bottom - s.stakes.top;
 
             var availableWidth = available.bounds.right - available.bounds.left;
-            var availableHeight = available.bounds.top - available.bounds.bottom;
+            var availableHeight = available.bounds.bottom - available.bounds.top;
             var xRatio = (left + width + right) / availableWidth;
             var yRatio = (top + height + bottom) / availableHeight;
             if (xRatio > 1) {
@@ -149,6 +151,11 @@ export class CartesianContainer implements Element {
 
         // Todo: calculate multiple times?
         const limited = flex(unlimited);
+
+        if (available) {
+            this.scales.x.range([limited.stakes.left, limited.stakes.right]);
+            this.scales.y.range([limited.stakes.top, limited.stakes.bottom]);
+        }
 
         return draw(limited);
     }

@@ -38,7 +38,7 @@ class FacetContainer implements Element {
             options);
     }
 
-    getRequiredSpace(availableSpace?: Space): Space {
+    getRequiredSpace(available?: Space): Space {
 
         const { children, scales } = this;
         const options = this.options;
@@ -47,7 +47,7 @@ class FacetContainer implements Element {
             return emptySpace();
         }
 
-        const spaces = children.map((c) => c.getRequiredSpace(availableSpace));
+        const spaces = children.map((c) => c.getRequiredSpace(available));
         const merged = mergeSpace(...spaces);
         const borders = merged.bounds;
         const stakes = {

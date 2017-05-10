@@ -1,3 +1,5 @@
+import { Scale } from '../scales/scale';
+
 export interface Space {
     stakes: Bounds;
     bounds: Bounds;
@@ -105,4 +107,67 @@ export function overflowsSpace(space: Space, available: Space) {
         merged.bounds.right > available.bounds.right ||
         merged.bounds.top > available.bounds.top
     );
+}
+
+export function stakesFromScales(scales: {
+    x: Scale<any, number>;
+    y: Scale<any, number>;
+}): Bounds {
+    const x = scales.x.range();
+    const y = scales.y.range();
+    return {
+        top: y[0],
+        right: x[1],
+        bottom: y[1],
+        left: x[0]
+    };
+}
+
+export class SpaceMeasurer {
+
+    private _bounds: Bounds;
+    private _isEmpty: boolean;
+
+    constructor() {
+        this._isEmpty = true;
+        this._bounds = null;
+    }
+
+    rect(this: SpaceMeasurer, x: number, y: number, w: number, h: number) {
+        if (this._isEmpty) {
+            this._bounds = SpaceMeasurer.startBounds;
+            this._isEmpty = false;
+        }
+        this._bounds.left = Math.min(this._bounds.left, x);
+        this._bounds.top = Math.min(this._bounds.top, y);
+        this._bounds.right = Math.max(this._bounds.right, x + w);
+        this._bounds.bottom = Math.max(this._bounds.bottom, y + h);
+        return this;
+    }
+
+    bounds() {
+        return this._isEmpty ? SpaceMeasurer.emptyBounds : this._bounds;
+    }
+
+    isEmpty() {
+        return this._isEmpty;
+    }
+
+    static startBounds = {
+        top: Number.MAX_VALUE,
+        right: Number.MIN_VALUE,
+        bottom: Number.MIN_VALUE,
+        left: Number.MAX_VALUE
+    };
+
+    static emptyBounds = {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0
+    }
+}
+
+export function spaceMeasurer(): SpaceMeasurer {
+    return new SpaceMeasurer();
 }

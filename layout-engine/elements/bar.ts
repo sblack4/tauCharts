@@ -1,5 +1,10 @@
 import { Element } from './element';
-import { Space, emptySpace } from './space';
+import {
+    emptySpace,
+    Space,
+    spaceMeasurer,
+    stakesFromScales
+} from './space';
 import { Context } from '../graphics/context';
 import { Scale, ScaleType, ScaleModel, OrdinalScale } from '../scales/scale';
 
@@ -90,10 +95,7 @@ class BarGroup implements Element {
 
         context.fillStyle({ color: '#d42' });
 
-        var top = Number.MAX_VALUE;
-        var right = Number.MIN_VALUE;
-        var bottom = Number.MIN_VALUE;
-        var left = Number.MAX_VALUE;
+        const measure = spaceMeasurer();
 
         data.forEach((d) => {
             const x = scales.x.from(d);
@@ -104,33 +106,16 @@ class BarGroup implements Element {
                 options.minWidth;
             const x0 = x - w / 2;
             const h = Math.abs(y - y0);
-
-            top = Math.min(top, y0);
-            right = Math.max(right, x0 + w);
-            bottom = Math.max(bottom, y0 + h);
-            left = Math.min(left, x0);
+            measure.rect(x0, y0, w, h);
 
             context
                 .rect(x0, y0, w, h)
                 .fill();
         });
 
-        const xRange = scales.x.range();
-        const yRange = scales.y.range();
-
         return {
-            stakes: {
-                top: yRange[0],
-                right: xRange[1],
-                bottom: yRange[1],
-                left: xRange[0]
-            },
-            bounds: {
-                top,
-                right,
-                bottom,
-                left
-            }
+            stakes: stakesFromScales(scales),
+            bounds: measure.bounds()
         };
 
     }
