@@ -3,11 +3,12 @@ import { Context } from '../graphics/context';
 import { Scale, ScaleModel } from '../scales/scale';
 // import createRegistry from '../registry';
 import {
-    Space,
-    mergeSpace,
+    alignSpaceBy,
     emptySpace,
-    // infiniteSpace,
-    moveBorders
+    mergeSpace,
+    moveBorders,
+    moveSpace,
+    Space,
 } from './space';
 
 export interface CartesianOptions {
@@ -89,7 +90,7 @@ export class CartesianContainer implements Element {
                 const space = c.draw(context, available, captured);
                 return mergeSpace(captured, space);
             }, emptySpace());
-            return merged;
+            return moveSpace(merged, -merged.bounds.left, -merged.bounds.top);
         };
 
         // Get required space without limits
@@ -97,7 +98,10 @@ export class CartesianContainer implements Element {
 
         // If we have no limits simply draw
         if (!available) {
-            return draw();
+            let space = moveSpace(unlimited, -unlimited.bounds.left, -unlimited.bounds.top);
+            this.scales.x.range([space.stakes.left, space.stakes.right]);
+            this.scales.y.range([space.stakes.top, space.stakes.bottom]);
+            return draw(unlimited);
         }
 
         // Grow or shrink

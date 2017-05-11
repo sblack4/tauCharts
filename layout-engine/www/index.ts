@@ -1,4 +1,5 @@
 import { Context } from '../graphics/context';
+import { Space, Bounds, mergeSpace } from '../elements/space';
 import CanvasContext from '../graphics/context.canvas';
 import SvgContext from '../graphics/context.svg';
 
@@ -10,6 +11,12 @@ import { createAxisBottom, createAxisLeft } from '../elements/axis';
 import createCartesianContainer from '../elements/cartesian';
 import createFacetContainer from '../elements/facet';
 
+var canvas = document.querySelector('canvas');
+var svg = document.querySelector('svg');
+var canvasContext = new CanvasContext(canvas.getContext('2d'));
+var svgContext = new SvgContext(svg);
+
+/*
 //
 // Sample drawing
 
@@ -44,11 +51,6 @@ function drawImage(context: Context) {
         .fill({ color: '#222' });
 }
 
-var canvas = document.querySelector('canvas');
-var svg = document.querySelector('svg');
-
-var canvasContext = new CanvasContext(canvas.getContext('2d'));
-var svgContext = new SvgContext(svg);
 drawImage(canvasContext);
 drawImage(svgContext);
 
@@ -188,3 +190,152 @@ console.log('chartContainer draw', chartContainer.draw(svgContext, {
     bounds: { left: 0, right: 200, top: 0, bottom: 200 },
     stakes: { left: 0, right: 200, top: 0, bottom: 200 }
 }));
+*/
+
+//
+// Draw bounds
+
+var drawing = (fn: (context: Context) => void) => {
+    fn(canvasContext);
+    fn(svgContext);
+};
+
+var drawSpace = (context: Context, space: Space, stakesColor = '#d24', boundsColor = '#2ad') => {
+    var s = space.stakes;
+    var b = space.bounds;
+    context
+        .fillStyle({ color: 'transparent' })
+        .rect(s.left, s.top, s.right - s.left, s.bottom - s.top)
+        .stroke({ color: stakesColor })
+        .rect(b.left, b.top, b.right - b.left, b.bottom - b.top)
+        .stroke({ color: boundsColor });
+    return space;
+};
+
+/*
+(function drawElementsSpace() {
+
+    var data = [
+        { effort: 50, count: 1, task: 'a', team: 'Alpha' },
+        { effort: 10, count: 4, task: 'b', team: 'Alpha' },
+        { effort: 40, count: 2, task: 'c', team: 'Alpha' },
+        { effort: 30, count: 2, task: 'a', team: 'Beta' },
+        { effort: 20, count: 3, task: 'b', team: 'Beta' },
+        { effort: 40, count: 4, task: 'c', team: 'Beta' }
+    ];
+
+    var scales = {
+        // x: createOrdinalScale(fullData, 'task'),
+        x: createLinearScale(data, 'count'),
+        y: createLinearScale(data, 'effort', { includeZero: true })
+    };
+
+    scales.x.range([100, 200]);
+    scales.y.range([100, 150]);
+
+    drawing((context) => {
+        var bar = createBarGroup(data, scales);
+        var spaceBar = bar.draw(context);
+        drawSpace(context, spaceBar);
+
+        var axisLeft = createAxisLeft(data, scales, { label: 'Abc' });
+        var spaceLeft = axisLeft.draw(context, null, spaceBar);
+        drawSpace(context, spaceLeft);
+
+        var axisBottom = createAxisBottom(data, scales, { label: 'Def' });
+        var spaceBottom = axisBottom.draw(context, null, mergeSpace(spaceBar, spaceLeft));
+        drawSpace(context, spaceBottom);
+
+        var spaceMerged = mergeSpace(spaceBar, spaceLeft, spaceBottom);
+        drawSpace(context, spaceMerged, 'green', 'red');
+    });
+})();
+*/
+
+//
+// Draw chart
+
+(function () {
+
+    var data = [
+        { effort: 50, count: 1, task: 'a', team: 'Alpha' },
+        { effort: 10, count: 4, task: 'b', team: 'Alpha' },
+        { effort: 40, count: 2, task: 'c', team: 'Alpha' },
+        { effort: 30, count: 2, task: 'a', team: 'Beta' },
+        { effort: 20, count: 3, task: 'b', team: 'Beta' },
+        { effort: 40, count: 4, task: 'c', team: 'Beta' }
+    ];
+
+    var scales = {
+        // x: createOrdinalScale(fullData, 'task'),
+        x: createLinearScale(data, 'count'),
+        y: createLinearScale(data, 'effort', { includeZero: true })
+    };
+
+    var chart = createCartesianContainer(data, scales, {}, [
+        createBarGroup(data, scales),
+        createAxisLeft(data, scales, { label: 'Abc' }),
+        createAxisBottom(data, scales, { label: 'Def' })
+    ]);
+
+    drawing((context) => {
+        var chartSpace = chart.draw(context);
+        drawSpace(context, chartSpace);
+    });
+})();
+
+//
+// Draw facet
+
+/*
+(function () {
+
+    var data = [
+        { effort: 50, count: 1, task: 'a', team: 'Alpha' },
+        { effort: 10, count: 4, task: 'b', team: 'Alpha' },
+        { effort: 40, count: 2, task: 'c', team: 'Alpha' },
+        { effort: 30, count: 2, task: 'a', team: 'Beta' },
+        { effort: 20, count: 3, task: 'b', team: 'Beta' },
+        { effort: 40, count: 4, task: 'c', team: 'Beta' }
+    ];
+    var dataA = data.filter((d) => d.team === 'Alpha');
+    var dataB = data.filter((d) => d.team === 'Beta');
+
+    var scaleEffort = createLinearScale(data, 'effort', { includeZero: true });
+    var scaleCount = createLinearScale(data, 'count');
+    var scaleTeam = createOrdinalScale(data, 'task');
+    var fakeScale = createLinearScale([{ value: 0 }, { value: 1 }], 'value');
+    var rootScales = {
+        x: scaleTeam,
+        y: fakeScale
+    };
+    var facetScales = {
+        x: scaleTeam
+    };
+    var cellScales = {
+        x: scaleCount,
+        y: scaleEffort
+    };
+
+    var facet = createCartesianContainer(data, rootScales, {}, [
+        createFacetContainer([dataA, dataB], facetScales, {}, [
+            createCartesianContainer(dataA, cellScales, {}, [
+                createBarGroup(dataA, cellScales),
+                createAxisLeft(dataA, cellScales, { label: 'Abc' }),
+                createAxisBottom(dataA, cellScales, { label: 'Def' })
+            ]),
+            createCartesianContainer(dataB, cellScales, {}, [
+                createBarGroup(dataB, cellScales),
+                createAxisLeft(dataB, cellScales, { label: 'Abc' }),
+                createAxisBottom(dataB, cellScales, { label: 'Def' })
+            ])
+        ]),
+        createAxisBottom(dataA, cellScales, { label: 'Def' })
+    ]);
+
+    drawing((context) => {
+        var chartSpace = facet.draw(context);
+        drawSpace(context, chartSpace);
+    });
+});
+*/

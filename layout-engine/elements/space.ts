@@ -5,7 +5,7 @@ export interface Space {
     bounds: Bounds;
 }
 
-interface Bounds {
+export interface Bounds {
     top: number;
     right: number;
     bottom: number;
@@ -30,30 +30,29 @@ export function emptySpace(): Space {
 }
 
 export function mergeSpace(...spaces: Space[]): Space {
-    const borders = {
-        left: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, stakes.left - bounds.left))),
-        right: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, bounds.right - stakes.right))),
-        top: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, stakes.top - bounds.top))),
-        bottom: Math.max(...spaces.map(({ stakes, bounds }) => Math.max(0, bounds.bottom - stakes.bottom))),
-    };
+    const left = Math.max(...spaces.map(({ stakes, bounds }) => stakes.left - bounds.left));
+    const right = Math.max(...spaces.map(({ stakes, bounds }) => bounds.right - stakes.right));
+    const top = Math.max(...spaces.map(({ stakes, bounds }) => stakes.top - bounds.top));
+    const bottom = Math.max(...spaces.map(({ stakes, bounds }) => bounds.bottom - stakes.bottom));
 
-    const stakes = {
-        width: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes.right - stakes.left))),
-        height: Math.max(...spaces.map(({ stakes }) => Math.max(0, stakes.bottom - stakes.bottom)))
-    };
+    const width = Math.max(...spaces.map(({ stakes }) => Math.abs(stakes.right - stakes.left)));
+    const height = Math.max(...spaces.map(({ stakes }) => Math.abs(stakes.bottom - stakes.top)));
+
+    const x0 = spaces[0].stakes.left;
+    const y0 = spaces[0].stakes.top;
 
     return {
         stakes: {
-            top: borders.top,
-            right: borders.left + stakes.width,
-            bottom: borders.top + stakes.height,
-            left: borders.left
+            top: y0,
+            right: x0 + width,
+            bottom: y0 + height,
+            left: x0
         },
         bounds: {
-            top: 0,
-            right: borders.left + stakes.width + borders.right,
-            bottom: borders.top + stakes.height + borders.bottom,
-            left: 0
+            top: y0 - top,
+            right: x0 + width + right,
+            bottom: y0 + height + bottom,
+            left: x0 - left
         }
     };
 }
@@ -63,18 +62,35 @@ export function moveBorders(space: Space, dx: number, dy: number): Space {
         stakes: Object.assign(space.stakes),
         bounds: {
             top: space.bounds.top + dy,
-            right: space.bounds.right + dy,
+            right: space.bounds.right + dx,
             bottom: space.bounds.bottom + dy,
-            left: space.bounds.left + dy
+            left: space.bounds.left + dx
+        }
+    };
+}
+
+export function moveSpace(space: Space, dx: number, dy: number): Space {
+    return {
+        stakes: {
+            top: space.stakes.top + dy,
+            right: space.stakes.right + dx,
+            bottom: space.stakes.bottom + dy,
+            left: space.stakes.left + dx
+        },
+        bounds: {
+            top: space.bounds.top + dy,
+            right: space.bounds.right + dx,
+            bottom: space.bounds.bottom + dy,
+            left: space.bounds.left + dx
         }
     };
 }
 
 export function alignSpaceBy(space: Space, target: Space): Space {
-    const left = space.stakes.left - space.bounds.left;
-    const right = space.stakes.right - space.bounds.right;
-    const top = space.stakes.top - space.bounds.top;
-    const bottom = space.stakes.bottom - space.bounds.bottom;
+    const left = Math.min(0, space.bounds.left - space.stakes.left);
+    const right = Math.max(0, space.bounds.right - space.stakes.right);
+    const top = Math.min(0, space.bounds.top - space.stakes.top);
+    const bottom = Math.max(0, space.bounds.bottom - space.stakes.bottom);
 
     const width = Math.max(
         space.stakes.right - space.stakes.left,
@@ -84,18 +100,21 @@ export function alignSpaceBy(space: Space, target: Space): Space {
         space.stakes.bottom - space.stakes.top,
         target.stakes.bottom - target.stakes.top);
 
+    const x0 = target.stakes.left;
+    const y0 = target.stakes.top;
+
     return {
         stakes: {
-            top: top,
-            right: left + width,
-            bottom: top + height,
-            left: left
+            top: y0,
+            right: x0 + width,
+            bottom: y0 + height,
+            left: x0
         },
         bounds: {
-            top: 0,
-            right: left + width + right,
-            bottom: top + height + bottom,
-            left: 0
+            top: y0 + top,
+            right: x0 + width + right,
+            bottom: y0 + height + bottom,
+            left: x0 + left
         }
     };
 }

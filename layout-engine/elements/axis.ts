@@ -173,9 +173,9 @@ class AxisBottom implements Element {
         return {
             stakes,
             bounds: {
-                top: y0,
+                top: y0 - s.anchorPad,
                 right: stakes.right + s.textSize.width / 2,
-                bottom: y0 + s.tickLineLen + s.tickTextPad * 2 + s.textSize.height + s.lableSize.height + s.labelPad * 2,
+                bottom: y0 + s.tickLineLen + s.tickTextPad * 2 + s.textSize.height + (this.options.label ? s.lableSize.height + s.labelPad * 2 : 0),
                 left: stakes.left - s.textSize.width / 2
             }
         };
@@ -185,7 +185,7 @@ class AxisBottom implements Element {
 
         const { data, scales } = this;
 
-        const yShift = captured ? Math.min(0, captured.bounds.bottom - captured.stakes.bottom) : 0;
+        const yShift = captured ? Math.max(0, captured.bounds.bottom - captured.stakes.bottom) : 0;
 
         const {
             textStyle,
@@ -245,7 +245,6 @@ class AxisLeft implements Element {
 
         const s = this._getLayout(available, captured);
 
-        const sw = 0;
         const sh = s.textSize.height + s.tickTextPad;
 
         const bw = s.anchorPad
@@ -259,15 +258,15 @@ class AxisLeft implements Element {
         return {
             stakes: {
                 top: -sh / 2,
-                right: sw + s.xShift,
+                right: s.xShift,
                 bottom: sh / 2,
                 left: s.xShift
             },
             bounds: {
                 top: -bh / 2,
-                right: bw + s.xShift,
+                right: s.xShift,
                 bottom: bh / 2,
-                left: s.xShift
+                left: s.xShift - bw
             }
         };
     }
@@ -317,9 +316,9 @@ class AxisLeft implements Element {
             stakes,
             bounds: {
                 top: stakes.top - s.textSize.height / 2,
-                right: x0,
+                right: x0 + s.anchorPad,
                 bottom: stakes.bottom + s.textSize.height / 2,
-                left: x0 - s.tickLineLen - s.tickTextPad * 2 - s.textSize.width - s.labelSize.width - s.labelPad * 2
+                left: x0 - s.tickLineLen - s.tickTextPad * 2 - s.textSize.width - (this.options.label ? s.labelSize.width + s.labelPad * 2 : 0)
             }
         };
     }
@@ -328,7 +327,7 @@ class AxisLeft implements Element {
 
         const { data, scales } = this;
 
-        const xShift = captured ? Math.max(0, captured.bounds.left - captured.stakes.left) : 0;
+        const xShift = captured ? Math.min(0, captured.bounds.left - captured.stakes.left) : 0;
 
         const {
             textStyle,

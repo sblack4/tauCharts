@@ -65,6 +65,7 @@ export default class SvgContext implements Context {
             }
         }).join(' ');
         this._element = createSvgElement(this._group, 'path', {
+            'fill': 'transparent',
             'd': path
         });
         this._setTransform(this._element);
@@ -76,12 +77,12 @@ export default class SvgContext implements Context {
         return this;
     }
     rect(x: number, y: number, width: number, height: number) {
-        this._element = createSvgElement(this._group, 'rect', { x, y, width, height });
+        this._element = createSvgElement(this._group, 'rect', { x, y, width, height, 'fill': 'transparent' });
         this._setTransform(this._element);
         return this;
     }
     circle(cx: number, cy: number, r: number) {
-        this._element = createSvgElement(this._group, 'circle', { cx, cy, r });
+        this._element = createSvgElement(this._group, 'circle', { cx, cy, r, 'fill': 'transparent' });
         this._setTransform(this._element);
         return this;
     }
@@ -141,6 +142,7 @@ export default class SvgContext implements Context {
         const t = this._textStyle;
         this._element = createSvgElement(this._group, 'text', {
             x, y,
+            'fill': 'transparent',
             'text-anchor': t.anchor,
             'dominant-baseline': ({
                 'hanging': 'hanging',
