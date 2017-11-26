@@ -29,14 +29,14 @@ If you want to contribute - see [how to run the project locally](#how-to-run-the
 Load JavaScript dependencies
 
 ```html
-<script src="//cdn.jsdelivr.net/d3js/latest/d3.min.js" charset="utf-8"></script>
-<script src="//cdn.jsdelivr.net/taucharts/latest/tauCharts.min.js" type="text/javascript"></script>
+<script src="//cdn.jsdelivr.net/npm/d3@3.5.17/d3.min.js" charset="utf-8"></script>
+<script src="//cdn.jsdelivr.net/npm/taucharts@1/build/production/tauCharts.min.js" type="text/javascript"></script>
 ```
 
 Include a CSS file, as well
 
 ```html
-<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/taucharts/latest/tauCharts.min.css">
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/taucharts@1/build/production/tauCharts.min.css">
 ```
 
 #### Downloading Taucharts using Bower
@@ -271,6 +271,10 @@ This command creates development and production assemblies in a *[./build]* fold
 [Taucharts demo page](https://demo.taucharts.com/)
 
 [GeoTremor mobile app](http://geotremor.tangentapps.com)
+
+[Dex](http://dexvis.net/)
+
+[Dex integration video](https://youtu.be/mxD4aQmC4sg)
 
 ## License
 
