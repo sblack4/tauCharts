@@ -1,11 +1,11 @@
 // jscs:disable disallowQuotedKeysInObjects
 // jscs:disable validateQuoteMarks
-
-var expect = require('chai').expect;
-var schemes = require('schemes');
-var tauCharts = require('src/tau.charts');
-var testUtils = require('testUtils');
-var {TauChartError, errorCodes} = require('testUtils');
+import {expect} from 'chai';
+import schemes from './utils/schemes';
+import Taucharts from '../src/tau.charts';
+import testUtils from './utils/utils';
+const {TauChartError, errorCodes} = testUtils;
+import * as d3 from 'd3-selection';
 
 // NOTE: Bars are now rendered into single container.
 var getGroupBar = function (div) {
@@ -81,7 +81,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw vertical stacked bar on y-measure / x-measure', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {x: 1, y: 0.60},
                 {x: 1, y: 0.30},
@@ -132,7 +132,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw horizontal stacked bar on y-measure / x-measure', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {y: 1, x: 0.60},
                 {y: 1, x: 0.30},
@@ -183,7 +183,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw vertical stacked bar on y-measure / x-category', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {x: 'A', y: 0.60},
                 {x: 'A', y: 0.30},
@@ -250,7 +250,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw horizontal stacked bar on y-category / x-measure', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {y: 'A', x: 0.60},
                 {y: 'A', x: 0.30},
@@ -316,7 +316,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw vertical stacked bar with color and size', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {x: 'A', y: 0.60, c: 'C1', s: 100},
                 {x: 'A', y: 0.40, c: 'C2', s: 50},
@@ -377,7 +377,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw vertical stacked bar with color and size + prettify', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {x: 'A', y: 0.60, c: 'C1', s: 100},
                 {x: 'A', y: 0.40, c: 'C2', s: 50},
@@ -437,7 +437,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should draw horizontal stacked bar with color and size + prettify', function () {
 
-        var plot = new tauCharts.Chart({
+        var plot = new Taucharts.Chart({
             data: [
                 {y: 'A', x: 0.60, c: 'C1', s: 100},
                 {y: 'A', x: 0.40, c: 'C2', s: 50},
@@ -497,7 +497,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should throw on y-category / x-category', function () {
 
-        var plot = new tauCharts.Plot({
+        var plot = new Taucharts.Plot({
             data: [
                 {y: 'A', x: 'X'},
                 {y: 'B', x: 'Y'}
@@ -533,13 +533,13 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
             err = ex;
         }
 
-        expect(err.errorCode).to.equals(tauCharts.api.errorCodes.STACKED_FIELD_NOT_NUMBER);
+        expect(err.errorCode).to.equals(Taucharts.api.errorCodes.STACKED_FIELD_NOT_NUMBER);
         expect(err.errorArgs.field).to.equals('y');
     });
 
     it('should support negative values in [stacked-bar]', function () {
 
-        var chart = new tauCharts.Chart({
+        var chart = new Taucharts.Chart({
             type: 'stacked-bar',
             data: [
                 {x: 'A', y: -0.60, c: 'C1', s: 100},
@@ -603,7 +603,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should support negative values in [horizontal-stacked-bar]', function () {
 
-        var chart = new tauCharts.Chart({
+        var chart = new Taucharts.Chart({
             type: 'horizontal-stacked-bar',
             data: [
                 {y: 'A', x: 0.60, c: 'C1', s: 100},
@@ -661,7 +661,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should support highlight event', function () {
 
-        var chart = new tauCharts.Chart({
+        var chart = new Taucharts.Chart({
             type: 'horizontal-stacked-bar',
             data: [
                 {y: 'A', x: 0.60, c: 'C1', s: 100},
@@ -677,28 +677,28 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
         var svg0 = chart.getSVG();
         expect(svg0.querySelectorAll('.bar').length).to.equals(3);
-        expect(svg0.querySelectorAll('.graphical-report__highlighted').length).to.equals(0);
-        expect(svg0.querySelectorAll('.graphical-report__dimmed').length).to.equals(0);
+        expect(svg0.querySelectorAll('.tau-chart__highlighted').length).to.equals(0);
+        expect(svg0.querySelectorAll('.tau-chart__dimmed').length).to.equals(0);
 
         var intervalNode = chart.select((n) => n.config.type === 'ELEMENT.INTERVAL')[0];
         intervalNode.fire('highlight', ((row) => (row.s > 0)));
 
         var svg1 = chart.getSVG();
         expect(svg1.querySelectorAll('.bar').length).to.equals(3);
-        expect(svg1.querySelectorAll('.graphical-report__highlighted').length).to.equals(2);
-        expect(svg1.querySelectorAll('.graphical-report__dimmed').length).to.equals(1);
+        expect(svg1.querySelectorAll('.tau-chart__highlighted').length).to.equals(2);
+        expect(svg1.querySelectorAll('.tau-chart__dimmed').length).to.equals(1);
 
         intervalNode.fire('highlight', ((row) => (null)));
 
         var svg2 = chart.getSVG();
         expect(svg2.querySelectorAll('.bar').length).to.equals(3);
-        expect(svg2.querySelectorAll('.graphical-report__highlighted').length).to.equals(0);
-        expect(svg2.querySelectorAll('.graphical-report__dimmed').length).to.equals(0);
+        expect(svg2.querySelectorAll('.tau-chart__highlighted').length).to.equals(0);
+        expect(svg2.querySelectorAll('.tau-chart__dimmed').length).to.equals(0);
     });
 
     it('should infer color order from data by default', function () {
 
-        var chart0 = new tauCharts.Chart({
+        var chart0 = new Taucharts.Chart({
             type: 'stacked-bar',
             data: [
                 {x: 'A', y: 1, c: 'C1'},
@@ -714,7 +714,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
         var svg0 = chart0.getSVG();
         expect(svg0.querySelectorAll('.bar').length).to.equals(3);
         var tempOrder = [];
-        d3.select(svg0).selectAll('.bar')[0].forEach(function (rect) {
+        d3.select(svg0).selectAll('.bar').nodes().forEach(function (rect) {
             var d3Rect = d3.select(rect);
             var d = d3Rect.data()[0];
             var y = d3Rect.attr('y');
@@ -726,7 +726,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should take color order from dimension order if specified', function () {
 
-        var chart0 = new tauCharts.Chart({
+        var chart0 = new Taucharts.Chart({
             dimensions: {
                 c: {'type': 'category', 'scale': 'ordinal', order: ['C3', 'C1', 'C2']},
                 x: {'type': 'category', 'scale': 'ordinal'},
@@ -747,7 +747,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
         var svg0 = chart0.getSVG();
         expect(svg0.querySelectorAll('.bar').length).to.equals(3);
         var tempOrder = [];
-        d3.select(svg0).selectAll('.bar')[0].forEach(function (rect) {
+        d3.select(svg0).selectAll('.bar').nodes().forEach(function (rect) {
             var d3Rect = d3.select(rect);
             var d = d3Rect.data()[0];
             var y = d3Rect.attr('y');
@@ -759,7 +759,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
 
     it('should have valid size in facet', function () {
 
-        var chart0 = new tauCharts.Chart({
+        var chart0 = new Taucharts.Chart({
             type: 'stacked-bar',
             data: [
                 {f: 'Volleyball', x: '20-25', y: 1, s: 100},
@@ -780,7 +780,7 @@ describe('ELEMENT.INTERVAL.STACKED', function () {
         var svg0 = chart0.getSVG();
         expect(svg0.querySelectorAll('.bar').length).to.equals(6);
         var ws = [];
-        d3.select(svg0).selectAll('.bar')[0].forEach(function (rect) {
+        d3.select(svg0).selectAll('.bar').nodes().forEach(function (rect) {
             var d3Rect = d3.select(rect);
             var w = d3Rect.attr('width');
             ws.push(w);

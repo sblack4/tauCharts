@@ -1,17 +1,16 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
+import * as d3 from 'd3-selection';
 
-{
-
-    var d3 = tauCharts.api.d3;
-    var utils = tauCharts.api.utils;
-    var svgUtils = tauCharts.api.svgUtils;
-    var pluginsSDK = tauCharts.api.pluginsSDK;
+const svgNS = 'http://www.w3.org/2000/svg';
+    var utils = Taucharts.api.utils;
+    var svgUtils = Taucharts.api.svgUtils;
+    var pluginsSDK = Taucharts.api.pluginsSDK;
 
     function labelBox(options) {
 
         options = (options || {});
 
-        var node = document.createElementNS(d3.ns.prefix.svg, 'g');
+        var node = document.createElementNS(svgNS, 'g');
 
         var g = d3.select(node).attr('class', 'tau-crosshair__label');
         g.append('rect').attr('class', 'tau-crosshair__label__box');
@@ -154,7 +153,7 @@ import tauCharts from 'taucharts';
             _createNode: function () {
 
                 var root = d3.select(
-                    document.createElementNS(d3.ns.prefix.svg, 'g'))
+                    document.createElementNS(svgNS, 'g'))
                     .attr('class', 'tau-crosshair');
                 this._labels = {x: null, y: null};
                 var createAxisNode = function (dir) {
@@ -262,38 +261,50 @@ import tauCharts from 'taucharts';
                 var color = scaleColor(e.data[scaleColor.dim]);
                 var xValue = e.data[scaleX.dim];
                 var yValue = e.data[scaleY.dim];
+                var ex = unit.screenModel.x(e.data);
+                var ey = unit.screenModel.y(e.data);
                 if (unit.config.stack) {
                     if (unit.config.flip) {
-                        xValue = unit.data()
-                            .filter(function (d) {
-                                var dy = d[scaleY.dim];
-                                return (
-                                    ((dy === yValue) || (dy - yValue === 0)) &&
-                                    ((unit.screenModel.x(e.data) - unit.screenModel.x(d)) *
-                                        d[scaleX.dim] >= 0)
-                                );
-                            }).reduce(function (total, d) {
-                                return (total + d[scaleX.dim]);
-                            }, 0);
+                        var xSameSign = unit.data().filter(function (d) {
+                            var dy = d[scaleY.dim];
+                            return (
+                                (d === e.data) ||
+                                ((dy === yValue) || (dy - yValue === 0)) &&
+                                ((unit.screenModel.x(e.data) - unit.screenModel.x(d)) * d[scaleX.dim] > 0)
+                            );
+                        });
+                        ex = (xValue < 0 ? Math.min : Math.max).apply(null, xSameSign.map(function (d) {
+                            return unit.screenModel.x(d);
+                        }, 0));
+                        xValue = xSameSign.reduce(function (total, d) {
+                            return (total + d[scaleX.dim]);
+                        }, 0);
                     } else {
-                        yValue = unit.data()
-                            .filter(function (d) {
-                                var dx = d[scaleX.dim];
-                                return (
-                                    ((dx === xValue) || (dx - xValue === 0)) &&
-                                    ((unit.screenModel.y(d) - unit.screenModel.y(e.data)) *
-                                        d[scaleY.dim] >= 0)
-                                );
-                            }).reduce(function (total, d) {
-                                return (total + d[scaleY.dim]);
-                            }, 0);
+                        var ySameSign = unit.data().filter(function (d) {
+                            var dx = d[scaleX.dim];
+                            return (
+                                (d === e.data) ||
+                                ((dx === xValue) || (dx - xValue === 0)) &&
+                                ((unit.screenModel.y(d) - unit.screenModel.y(e.data)) * d[scaleY.dim] > 0)
+                            );
+                        });
+                        ey = (yValue < 0 ? Math.max : Math.min).apply(null, ySameSign.map(function (d) {
+                            return unit.screenModel.y(d);
+                        }, 0));
+                        yValue = ySameSign.reduce(function (total, d) {
+                            return (total + d[scaleY.dim]);
+                        }, 0);
                     }
                 }
 
                 var box = e.node.getBBox();
                 var pad = (function getCrossPadding() {
-                    if (unit.config.type === 'ELEMENT.INTERVAL' ||
-                        unit.config.type === 'ELEMENT.INTERVAL.STACKED') {
+                    const paddingElements = [
+                        'ELEMENT.AREA',
+                        'ELEMENT.INTERVAL',
+                        'ELEMENT.INTERVAL.STACKED',
+                    ];
+                    if (paddingElements.indexOf(unit.config.type) >= 0) {
                         return {
                             x: (box.width * (unit.config.flip ? xValue > 0 ? 1 : 0 : 0.5)),
                             y: (box.height * (unit.config.flip ? 0.5 : yValue > 0 ? 1 : 0))
@@ -309,14 +320,14 @@ import tauCharts from 'taucharts';
                     {
                         label: this._getFormat(scaleX.dim)(xValue),
                         start: 0,
-                        value: scaleX(xValue),
+                        value: ex,
                         crossPadding: pad.x,
                         minMode: (parentUnit && parentUnit.guide.x.hide)
                     },
                     {
                         label: this._getFormat(scaleY.dim)(yValue),
                         start: unit.config.options.height,
-                        value: scaleY(yValue),
+                        value: ey,
                         crossPadding: pad.y,
                         minMode: (parentUnit && parentUnit.guide.y.hide)
                     },
@@ -360,7 +371,7 @@ import tauCharts from 'taucharts';
                                 this._hideCrosshair();
                                 return;
                             }
-                            if (unit.data().indexOf(e.data) >= 0) {
+                            if (unit === e.unit) {
                                 var parentUnit = pluginsSDK.getParentUnit(this._chart.getSpec(), unit.config);
                                 this._showCrosshair(e, unit, parentUnit);
                             }
@@ -369,68 +380,23 @@ import tauCharts from 'taucharts';
             },
 
             _getFormat: function (k) {
-                var info = this._formatters[k] || {
-                    format: function (x) {
-                        return String(x);
-                    }
-                };
-                return info.format;
+                return (this._formatters[k] ?
+                    this._formatters[k].format :
+                    (x) => String(x));
             },
 
             onRender: function () {
 
-                this._formatters = this._getFormatters();
+                this._formatters = pluginsSDK.getFieldFormatters(
+                    this._chart.getSpec(),
+                    settings.formatters);
                 this._subscribeToHover();
-            },
-
-            _getFormatters: function () {
-
-                var info = pluginsSDK.extractFieldsFormatInfo(this._chart.getSpec());
-                Object.keys(info).forEach(function (k) {
-                    if (info[k].parentField) {
-                        delete info[k];
-                    }
-                });
-
-                var toLabelValuePair = function (x) {
-
-                    var res = {};
-
-                    if (typeof x === 'function' || typeof x === 'string') {
-                        res = {format: x};
-                    } else if (utils.isObject(x)) {
-                        res = utils.pick(x, 'label', 'format', 'nullAlias');
-                    }
-
-                    return res;
-                };
-
-                Object.keys(settings.formatters).forEach(function (k) {
-
-                    var fmt = toLabelValuePair(settings.formatters[k]);
-
-                    info[k] = Object.assign(
-                        ({label: k, nullAlias: ('No ' + k)}),
-                        (info[k] || {}),
-                        (utils.pick(fmt, 'label', 'nullAlias')));
-
-                    if (fmt.hasOwnProperty('format')) {
-                        info[k].format = (typeof fmt.format === 'function') ?
-                            (fmt.format) :
-                            (tauCharts.api.tickFormat.get(fmt.format, info[k].nullAlias));
-                    } else {
-                        info[k].format = (info[k].hasOwnProperty('format')) ?
-                            (info[k].format) :
-                            (tauCharts.api.tickFormat.get(null, info[k].nullAlias));
-                    }
-                });
-
-                return info;
             }
         };
 
         return plugin;
     }
 
-    tauCharts.api.plugins.add('crosshair', Crosshair);
-}
+    Taucharts.api.plugins.add('crosshair', Crosshair);
+
+export default Crosshair;

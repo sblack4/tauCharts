@@ -1,18 +1,18 @@
 // jscs:disable disallowQuotedKeysInObjects
 // jscs:disable validateQuoteMarks
-define(function (require) {
-    var expect = require('chai').expect;
-    var schemes = require('schemes');
-    var assert = require('chai').assert;
-    var tauCharts = require('src/tau.charts');
-    var Cartesian = require('src/elements/coords.cartesian').Cartesian;
-    var Interval = require('src/elements/element.interval').Interval;
-    var ScalesFactory = require('src/scales-factory').ScalesFactory;
-    var utils = require('src/utils/utils').utils;
-    var testUtils = require('testUtils');
+import {expect} from 'chai';
+import schemes from './utils/schemes';
+import {assert} from 'chai';
+import * as d3 from 'd3-selection';
+import Taucharts from '../src/tau.charts';
+import {Cartesian as Cartesian} from '../src/elements/coords.cartesian';
+import {Interval as Interval} from '../src/elements/element.interval';
+import {ScalesFactory as ScalesFactory} from '../src/scales-factory';
+import * as utils from '../src/utils/utils';
+import testUtils from './utils/utils';
 
     var iref = 0;
-    var scalesRegistry = tauCharts.api.scalesRegistry.instance({
+    var scalesRegistry = Taucharts.api.scalesRegistry.instance({
         references: new WeakMap(),
         refCounter: (() => (++iref))
     });
@@ -154,7 +154,7 @@ define(function (require) {
                     context.element = document.createElement('div');
                     document.body.appendChild(context.element);
 
-                    // tauCharts.Plot.globalSettings = testChartSettings;
+                    // Taucharts.Plot.globalSettings = testChartSettings;
 
                     var sss = convertSpec(spec, data);
                     if (size.print) {
@@ -164,7 +164,7 @@ define(function (require) {
                     sss.settings = sss.settings || {};
                     sss.settings.specEngine = 'NONE';
                     sss.settings.layoutEngine = 'NONE';
-                    context.chart = new tauCharts.Plot(sss);
+                    context.chart = new Taucharts.Plot(sss);
                     context.chart.renderTo(
                         context.element,
                         {
@@ -972,52 +972,52 @@ define(function (require) {
                 var svg0 = context.chart.getSVG();
                 expect(svg0.querySelectorAll('.bar').length).to.equals(4);
                 expect(svg0.querySelectorAll('.i-role-label').length).to.equals(4);
-                expect(svg0.querySelectorAll('.graphical-report__highlighted').length).to.equals(0);
-                expect(svg0.querySelectorAll('.graphical-report__dimmed').length).to.equals(0);
+                expect(svg0.querySelectorAll('.tau-chart__highlighted').length).to.equals(0);
+                expect(svg0.querySelectorAll('.tau-chart__dimmed').length).to.equals(0);
 
                 var intervalNode = context.chart.select((n) => n.config.type === 'ELEMENT.INTERVAL')[0];
                 intervalNode.fire('highlight', ((row) => (row.color === 'green')));
 
                 var svg1 = context.chart.getSVG();
                 expect(svg1.querySelectorAll('.bar').length).to.equals(4);
-                expect(svg1.querySelectorAll('.bar.graphical-report__highlighted').length).to.equals(1);
-                expect(svg1.querySelectorAll('.bar.graphical-report__dimmed').length).to.equals(3);
+                expect(svg1.querySelectorAll('.bar.tau-chart__highlighted').length).to.equals(1);
+                expect(svg1.querySelectorAll('.bar.tau-chart__dimmed').length).to.equals(3);
 
-                expect(svg1.querySelectorAll('.i-role-label.graphical-report__highlighted').length).to.equals(1);
-                expect(svg1.querySelectorAll('.i-role-label.graphical-report__dimmed').length).to.equals(3);
+                expect(svg1.querySelectorAll('.i-role-label.tau-chart__highlighted').length).to.equals(1);
+                expect(svg1.querySelectorAll('.i-role-label.tau-chart__dimmed').length).to.equals(3);
 
                 intervalNode.fire('highlight', ((row) => null));
 
                 var svg2 = context.chart.getSVG();
                 expect(svg2.querySelectorAll('.bar').length).to.equals(4);
-                expect(svg2.querySelectorAll('.bar.graphical-report__highlighted').length).to.equals(0);
-                expect(svg2.querySelectorAll('.bar.graphical-report__dimmed').length).to.equals(0);
+                expect(svg2.querySelectorAll('.bar.tau-chart__highlighted').length).to.equals(0);
+                expect(svg2.querySelectorAll('.bar.tau-chart__dimmed').length).to.equals(0);
 
-                expect(svg1.querySelectorAll('.i-role-label.graphical-report__highlighted').length).to.equals(0);
-                expect(svg1.querySelectorAll('.i-role-label.graphical-report__dimmed').length).to.equals(0);
+                expect(svg1.querySelectorAll('.i-role-label.tau-chart__highlighted').length).to.equals(0);
+                expect(svg1.querySelectorAll('.i-role-label.tau-chart__dimmed').length).to.equals(0);
             });
 
             it("should react on mouseover / mouseout events", function () {
                 var svg0 = context.chart.getSVG();
                 expect(svg0.querySelectorAll('.bar').length).to.equals(4);
                 expect(svg0.querySelectorAll('.i-role-label').length).to.equals(4);
-                expect(svg0.querySelectorAll('.graphical-report__highlighted').length).to.equals(0);
-                expect(svg0.querySelectorAll('.graphical-report__dimmed').length).to.equals(0);
+                expect(svg0.querySelectorAll('.tau-chart__highlighted').length).to.equals(0);
+                expect(svg0.querySelectorAll('.tau-chart__dimmed').length).to.equals(0);
 
                 var intervalNode = context.chart.select((n) => n.config.type === 'ELEMENT.INTERVAL')[0];
                 intervalNode.fire('data-hover', {data:context.chart.getData()[0]});
 
                 var svg1 = context.chart.getSVG();
                 expect(svg1.querySelectorAll('.bar').length).to.equals(4);
-                expect(svg1.querySelectorAll('.bar.graphical-report__highlighted').length).to.equals(1);
-                expect(svg1.querySelectorAll('.bar.graphical-report__dimmed').length).to.equals(0);
+                expect(svg1.querySelectorAll('.bar.tau-chart__highlighted').length).to.equals(1);
+                expect(svg1.querySelectorAll('.bar.tau-chart__dimmed').length).to.equals(0);
 
                 intervalNode.fire('data-hover', {});
 
                 var svg2 = context.chart.getSVG();
                 expect(svg2.querySelectorAll('.bar').length).to.equals(4);
-                expect(svg2.querySelectorAll('.bar.graphical-report__highlighted').length).to.equals(0);
-                expect(svg2.querySelectorAll('.bar.graphical-report__dimmed').length).to.equals(0);
+                expect(svg2.querySelectorAll('.bar.tau-chart__highlighted').length).to.equals(0);
+                expect(svg2.querySelectorAll('.bar.tau-chart__dimmed').length).to.equals(0);
             });
         },
         {
@@ -1054,7 +1054,7 @@ define(function (require) {
                 var testCursorAt = (part, value) => {
                     var y = ((1 - part) * top + part * bottom);
                     testUtils.simulateEvent('mousemove', svg, cx, y);
-                    var highlighted = d3.select('.graphical-report__highlighted');
+                    var highlighted = d3.select('.tau-chart__highlighted');
                     expect(highlighted.data()[0].effort).to.equal(value);
                     expect(testUtils.elementFromPoint(cx, y)).to.equal(highlighted.node());
                 };
@@ -1207,7 +1207,7 @@ define(function (require) {
 
         it('should draw horizontal bar on 2 order axis', function () {
 
-            var plot = new tauCharts.Chart({
+            var plot = new Taucharts.Chart({
                 data: [
                     {
                         "createDate": new Date(iso("2014-09-01T00:00:00")),
@@ -1280,7 +1280,7 @@ define(function (require) {
 
         it('should draw vertical bar on 2 order axis', function () {
 
-            var plot = new tauCharts.Chart({
+            var plot = new Taucharts.Chart({
                 data: [
                     {
                         "createDate": new Date(iso("2014-09-01T00:00:00")),
@@ -1418,4 +1418,3 @@ define(function (require) {
             autoWidth: false
         }
     );
-});

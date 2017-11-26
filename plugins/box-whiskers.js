@@ -1,8 +1,7 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
+import * as d3 from 'd3-selection';
 
-{
-
-    var utils = tauCharts.api.utils;
+    var utils = Taucharts.api.utils;
 
     var MIN = 'minimum';
     var MAX = 'maximum';
@@ -91,7 +90,7 @@ import tauCharts from 'taucharts';
         return summary;
     }
 
-    tauCharts.api.unitsRegistry.reg(
+    Taucharts.api.unitsRegistry.reg(
         'ELEMENT.BOX-WHISKERS',
         {
             getAdjustScalesRules: function () {
@@ -195,13 +194,13 @@ import tauCharts from 'taucharts';
                 var self = this;
                 var screenModel = this.node().screenModel;
 
-                var createUpdateFunc = tauCharts.api.d3_animationInterceptor;
+                var createUpdateFunc = Taucharts.api.d3_animationInterceptor;
 
                 var drawPart = function (that, props) {
                     var speed = self.node().config.guide.animationSpeed;
                     var part = that
                         .selectAll('.' + props.class)
-                        .data(function(row) {
+                        .data(function (row) {
                             return [row];
                         }, screenModel.id);
                     part.exit()
@@ -215,30 +214,30 @@ import tauCharts from 'taucharts';
                         .call(createUpdateFunc(speed, {width: 0}, props));
                 };
 
-                var drawElement = function () {
+                var drawElement = function (selection) {
 
-                    drawPart(this, self.buildRangeModel(screenModel, {
+                    drawPart(selection, self.buildRangeModel(screenModel, {
                         size: 2,
                         y0: MIN,
                         y1: Q1,
                         class: 'range-min-Q1'
                     }));
 
-                    drawPart(this, self.buildRangeModel(screenModel, {
+                    drawPart(selection, self.buildRangeModel(screenModel, {
                         size: 2,
                         y0: Q3,
                         y1: MAX,
                         class: 'range-Q3-max'
                     }));
 
-                    drawPart(this, self.buildRangeModel(screenModel, {
+                    drawPart(selection, self.buildRangeModel(screenModel, {
                         size: 20,
                         y0: Q1,
                         y1: Q3,
                         class: 'range-Q1-Q3'
                     }));
 
-                    drawPart(this, self.buildRangeModel(screenModel, {
+                    drawPart(selection, self.buildRangeModel(screenModel, {
                         size: 20,
                         minHeight: 1,
                         y0: MAX,
@@ -246,7 +245,7 @@ import tauCharts from 'taucharts';
                         class: 'limit-max'
                     }));
 
-                    drawPart(this, self.buildRangeModel(screenModel, {
+                    drawPart(selection, self.buildRangeModel(screenModel, {
                         size: 20,
                         minHeight: 1,
                         y0: MIN,
@@ -254,7 +253,7 @@ import tauCharts from 'taucharts';
                         class: 'limit-min'
                     }));
 
-                    drawPart(this, self.buildRangeModel(screenModel, {
+                    drawPart(selection, self.buildRangeModel(screenModel, {
                         size: 20,
                         minHeight: 2,
                         y0: MEDIAN,
@@ -374,5 +373,6 @@ import tauCharts from 'taucharts';
         };
     }
 
-    tauCharts.api.plugins.add('box-whiskers', boxWhiskersPlot);
-}
+    Taucharts.api.plugins.add('box-whiskers', boxWhiskersPlot);
+
+export default boxWhiskersPlot;

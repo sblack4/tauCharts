@@ -1,10 +1,9 @@
 // jscs:disable *
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
+import * as d3 from 'd3-array';
 
-{
-
-    var utils = tauCharts.api.utils;
-    var pluginsSDK = tauCharts.api.pluginsSDK;
+    var utils = Taucharts.api.utils;
+    var pluginsSDK = Taucharts.api.pluginsSDK;
     var tokens = pluginsSDK.tokens();
 
     function Layers(xSettings) {
@@ -583,19 +582,19 @@ import tauCharts from 'taucharts';
             },
 
             // jscs:disable maximumLineLength
-            containerTemplate: '<div class="graphical-report__trendlinepanel"></div>',
+            containerTemplate: '<div class="tau-chart__trendlinepanel"></div>',
             template: utils.template([
-                '<label class="graphical-report__trendlinepanel__title graphical-report__checkbox">',
+                '<label class="tau-chart__trendlinepanel__title tau-chart__checkbox">',
                 '   <input type="checkbox"',
-                '          class="graphical-report__checkbox__input i-role-show-layers"',
+                '          class="tau-chart__checkbox__input i-role-show-layers"',
                 '          <%= (showLayers ? "checked" : "") %>',
                 '   />',
-                '   <span class="graphical-report__checkbox__icon"></span>',
-                '   <span class="graphical-report__checkbox__text"><%= title %></span>',
+                '   <span class="tau-chart__checkbox__icon"></span>',
+                '   <span class="tau-chart__checkbox__text"><%= title %></span>',
                 '</label>',
 
                 '<div>',
-                '<select class="i-role-change-mode graphical-report__select graphical-report__trendlinepanel__control">',
+                '<select class="i-role-change-mode tau-chart__select tau-chart__trendlinepanel__control">',
                 '   <option <%= ((mode === "dock")  ? "selected" : "") %> value="dock">' + tokens.get('Dock') + '</option>',
                 '   <option <%= ((mode === "merge") ? "selected" : "") %> value="merge">' + tokens.get('Merge') + '</option>',
                 '</select>',
@@ -616,6 +615,7 @@ import tauCharts from 'taucharts';
         };
     }
 
-    tauCharts.api.plugins.add('layers', Layers);
-}
+    Taucharts.api.plugins.add('layers', Layers);
 // jscs:enable *
+
+export default Layers;

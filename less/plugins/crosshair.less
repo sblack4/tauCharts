@@ -1,10 +1,10 @@
 @import "../variable";
 
-.graphical-report__layout .tau-crosshair {
+.tau-chart__layout .tau-crosshair {
 
     &__line {
         shape-rendering: crispEdges;
-        stroke-opacity: 0.85;
+        stroke-dasharray: 1px 1px;
         stroke-width: 1px;
     }
 
@@ -21,10 +21,18 @@
 
     &__line-shadow {
         shape-rendering: crispEdges;
-        stroke: @bg-color;
-        stroke-opacity: 0.5;
-        stroke-width: 3px;
+        stroke: mix(@font-color, @bg-color, 25%);
+        stroke-width: 1px;
     }
+
+    // Prevent drawing line shadow pixel over highlighted stroke
+    &__group.y .tau-crosshair__line-shadow {
+        transform: translateX(-0.5px);
+    }
+    &__group.x .tau-crosshair__line-shadow {
+        transform: translateY(0.5px);
+    }
+
     &__label__text-shadow {
         stroke-linejoin: round;
         stroke-width: 3px;
@@ -41,11 +49,11 @@
 
 .generate-crosshair-colors(@n; @i: 1) when (@i =< @n) {
 
-    .graphical-report__layout .tau-crosshair__line.color@{n}-@{i} {
+    .tau-chart__layout .tau-crosshair__line.color@{n}-@{i} {
         stroke: extract(@category-colors, @i);
     }
 
-    .graphical-report__layout .tau-crosshair__label.color@{n}-@{i} {
+    .tau-chart__layout .tau-crosshair__label.color@{n}-@{i} {
         .tau-crosshair__label__text-shadow {
             stroke: extract(@category-colors, @i);
         }

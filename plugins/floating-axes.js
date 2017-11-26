@@ -1,9 +1,10 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
+import * as d3Selection from 'd3-selection';
+const d3 = {...d3Selection};
 
-{
+const domUtils = Taucharts.api.domUtils;
 
-    var utils = tauCharts.api.utils;
-    var d3 = tauCharts.api.d3;
+    var utils = Taucharts.api.utils;
 
     var SHADOW_SIZE = 16;
     var SHADOW_COLOR_0 = '#E5E7EB';
@@ -130,7 +131,7 @@ import tauCharts from 'taucharts';
                 var minXAxesY = mmin(axesInfo.x.map(function (i) {
                     return (i.axisTransform.translate.y + i.parentTransform.translate.y);
                 })) - 1;
-                var scrollbars = tauCharts.api.globalSettings.getScrollbarSize(root);
+                var scrollbars = Taucharts.api.globalSettings.getScrollbarSize(root);
 
                 function getPositions() {
                     return {
@@ -410,15 +411,13 @@ import tauCharts from 'taucharts';
                 // Fix invoking unexpected chart pointer events
                 d3Svg.selectAll('.floating-axes')
                     .on('mouseenter', function () {
-                        var evt = document.createEvent('SVGEvents');
-                        evt.initEvent('mouseleave', true, true);
-                        svg.dispatchEvent(evt);
+                        domUtils.dispatchMouseEvent(svg, 'mouseleave');
                     })
                     .on('mousemove', function () {
-                        d3.event.stopPropagation();
+                        d3Selection.event.stopPropagation();
                     })
                     .on('click', function () {
-                        d3.event.stopPropagation();
+                        d3Selection.event.stopPropagation();
                     });
             },
 
@@ -536,7 +535,7 @@ import tauCharts from 'taucharts';
         };
         var parent = node;
         var transform;
-        while (parent.nodeName.toUpperCase() !== 'SVG') {
+        while (parent && parent.nodeName.toUpperCase() !== 'SVG') {
             transform = getDynamicTransform(parent);
             info.translate0.x += transform.translate0.x;
             info.translate0.y += transform.translate0.y;
@@ -626,5 +625,6 @@ import tauCharts from 'taucharts';
         };
     };
 
-    tauCharts.api.plugins.add('floating-axes', floatingAxes);
-}
+    Taucharts.api.plugins.add('floating-axes', floatingAxes);
+
+export default floatingAxes;

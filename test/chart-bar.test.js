@@ -1,14 +1,15 @@
-define(function(require){
-    var assert = require('chai').assert;
-    var schemes = require('schemes');
-    var tauChart = require('src/tau.charts');
-    var noScrollStyle = require('test/utils/utils').noScrollStyle;
+import {assert} from 'chai';
+import schemes from './utils/schemes';
+import tauChart from '../src/tau.charts';
+import testUtils from './utils/utils';
+const {noScrollStyle} = testUtils;
 
-    var createTestDiv = function () {
+    var createTestDiv = function (id) {
         noScrollStyle.create();
         var testDiv = document.createElement('div');
         testDiv.style.width = '800px';
         testDiv.style.height = '600px';
+        testDiv.setAttribute('data-chart-id', id);
         document.body.appendChild(testDiv);
         removeTestDiv = function () {
             document.body.removeChild(testDiv);
@@ -40,7 +41,7 @@ define(function(require){
         });
 
         it('should draw labels after bars', function () {
-            var testDiv = createTestDiv();
+            var testDiv = createTestDiv('should draw labels after bars');
             var data1 = [
                 {x: 10, y: 10, t: 'a'},
                 {x: 10, y: 20, t: 'b'},
@@ -79,7 +80,7 @@ define(function(require){
 
         it('should put labels inside and outside of horizontal bars', function () {
             var toArray = (obj) => Array.prototype.slice.call(obj, 0);
-            var testDiv = createTestDiv();
+            var testDiv = createTestDiv('should put labels inside and outside of horizontal bars');
             var data = [
                 {x: 10, y: 10, l: 'Anger & swearing - Difficult workaround'},
                 {x: 20, y: 20, l: 'Confused'},
@@ -124,7 +125,7 @@ define(function(require){
 
         it('should put labels inside and outside of vertical bars', function () {
             var toArray = (obj) => Array.prototype.slice.call(obj, 0);
-            var testDiv = createTestDiv();
+            var testDiv = createTestDiv('should put labels inside and outside of vertical bars');
             var data = [
                 {x: 10, y: 10, l: 'Anger & swearing - Difficult workaround'},
                 {x: 20, y: 20, l: 'Confused'},
@@ -172,17 +173,23 @@ define(function(require){
         var testData = tauChart.api.utils.range(100).map(function (i) {
             return {
                 x: 20,
-                y: i
+                y: i,
+                c: ['a', 'b', 'c'][i % 3]
             };
         });
 
         it('should not reserve space when no bar label', function () {
-            var testDiv = createTestDiv();
+            var testDiv = createTestDiv('should not reserve space when no bar label');
             var bar = new tauChart.Chart({
                 type: 'horizontal-bar',
                 data: testData,
                 x: 'x',
-                y: 'y'
+                y: 'y',
+                settings: {
+                    avoidScrollAtRatio: 1,
+                    layoutEngine: 'EXTRACT',
+                    fitModel: 'normal'
+                }
             });
             bar.renderTo(testDiv);
             assert.equal(Number(bar.getSVG().getAttribute('width')), 800, 'chart width');
@@ -192,7 +199,7 @@ define(function(require){
         });
 
         it('should reserve space when bar label is set', function () {
-            var testDiv = createTestDiv();
+            var testDiv = createTestDiv('should reserve space when bar label is set');
             var bar = new tauChart.Chart({
                 type: 'horizontal-bar',
                 data: testData,
@@ -202,10 +209,25 @@ define(function(require){
             });
             bar.renderTo(testDiv);
             assert.equal(Number(bar.getSVG().getAttribute('width')), 800, 'chart width');
-            assert.equal(Number(bar.getSVG().getAttribute('height')), 1075, 'chart height');
+            assert.equal(Number(bar.getSVG().getAttribute('height')), 2075, 'chart height');
+            bar.destroy();
+            removeTestDiv();
+        });
+
+        it('should reserve space when stacked bar label is set', function () {
+            var testDiv = createTestDiv('should reserve space when stacked bar label is set');
+            var bar = new tauChart.Chart({
+                type: 'horizontal-stacked-bar',
+                data: testData.map((d, i) => Object.assign({}, d, {dy: String(i % 40)})),
+                x: 'x',
+                y: 'dy',
+                color: 'c',
+                label: 'y'
+            });
+            bar.renderTo(testDiv);
+            assert.equal(Number(bar.getSVG().getAttribute('width')), 800, 'chart width');
+            assert.equal(Number(bar.getSVG().getAttribute('height')), 875, 'chart height');
             bar.destroy();
             removeTestDiv();
         });
     });
-
-});

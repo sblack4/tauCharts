@@ -1,8 +1,6 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
 
-{
-
-    var utils = tauCharts.api.utils;
+    var utils = Taucharts.api.utils;
 
     function ChartSettings(xSettings) {
 
@@ -52,10 +50,10 @@ import tauCharts from 'taucharts';
 
             template: utils.template(
                 [
-                    '<div class="graphical-report__chartsettingspanel">',
+                    '<div class="tau-chart__chartsettingspanel">',
                         '<div>',
                             '<span>View Mode:&nbsp;</span>',
-                            '<select class="i-role-fit-model graphical-report__select">',
+                            '<select class="i-role-fit-model tau-chart__select">',
                             '<%= modes %> />',
                             '</select>',
                         '</div>',
@@ -64,5 +62,6 @@ import tauCharts from 'taucharts';
         };
     }
 
-    tauCharts.api.plugins.add('settings', ChartSettings);
-}
+    Taucharts.api.plugins.add('settings', ChartSettings);
+
+export default ChartSettings;

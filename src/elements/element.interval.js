@@ -5,10 +5,10 @@ import {
     d3_animationInterceptor,
     d3_setClasses as classes
 } from '../utils/d3-decorators';
-import {utils} from '../utils/utils';
-import {utilsDom} from '../utils/utils-dom';
-import {utilsDraw} from '../utils/utils-draw';
-import d3 from 'd3';
+import * as utils from '../utils/utils';
+import * as utilsDom from '../utils/utils-dom';
+import * as utilsDraw from '../utils/utils-draw';
+import * as d3 from 'd3-selection';
 
 const d3Data = ((node) => d3.select(node).data()[0]);
 
@@ -27,7 +27,9 @@ const Interval = {
                 maxHighlightDistance: 32,
                 prettify: true,
                 sortByBarHeight: true,
-                enableColorToBarPosition: !config.stack
+                enableColorToBarPosition: (config.guide.enableColorToBarPosition != null ?
+                    config.guide.enableColorToBarPosition :
+                    !config.stack)
             });
 
         config.guide.size = utils.defaults(
@@ -79,8 +81,7 @@ const Interval = {
             config.stack && GrammarRegistry.get('stack'),
             enableColorPositioning && GrammarRegistry.get('positioningByColor')
         ]
-            .filter(x => x)
-            .concat(config.transformModel || []);
+            .filter(x => x);
 
         config.adjustRules = [
             (enableDistributeEvenly && ((prevModel, args) => {
@@ -473,8 +474,8 @@ const Interval = {
 
     highlight(filter) {
 
-        const x = 'graphical-report__highlighted';
-        const _ = 'graphical-report__dimmed';
+        const x = 'tau-chart__highlighted';
+        const _ = 'tau-chart__dimmed';
 
         const container = this.node().config.options.container;
         const classed = {

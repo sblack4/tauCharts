@@ -1,13 +1,11 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
+import * as d3 from 'd3-format';
 
-{
-
-    var d3 = tauCharts.api.d3;
-    var utils = tauCharts.api.utils;
-    var pluginsSDK = tauCharts.api.pluginsSDK;
-    var RESET_SELECTOR = '.graphical-report__legend__reset';
-    var COLOR_ITEM_SELECTOR = '.graphical-report__legend__item-color';
-    var COLOR_TOGGLE_SELECTOR = '.graphical-report__legend__guide--color__overlay';
+    var utils = Taucharts.api.utils;
+    var pluginsSDK = Taucharts.api.pluginsSDK;
+    var RESET_SELECTOR = '.tau-chart__legend__reset';
+    var COLOR_ITEM_SELECTOR = '.tau-chart__legend__item-color';
+    var COLOR_TOGGLE_SELECTOR = '.tau-chart__legend__guide--color__overlay';
     var SIZE_TICKS_COUNT = 4;
     var FONT_SIZE = 13;
 
@@ -16,22 +14,7 @@ import tauCharts from 'taucharts';
         return ++counter;
     };
 
-    var xml = function (tag, _attrs) {
-        var childrenArgIndex = 2;
-        var attrs = _attrs;
-        if (typeof attrs !== 'object') {
-            childrenArgIndex = 1;
-            attrs = {};
-        }
-        var children = Array.prototype.slice.call(arguments, childrenArgIndex);
-        return (
-            '<' + tag +
-            Object.keys(attrs).map(function (key) {
-                return ' ' + key + '="' + attrs[key] + '"';
-            }).join('') +
-            (children.length > 0 ? ('>' + children.join('') + '</' + tag + '>') : '/>')
-        );
-    };
+    const xml = Taucharts.api.utils.xml;
 
     var splitEvenly = function (domain, parts) {
         var min = domain[0];
@@ -325,6 +308,18 @@ import tauCharts from 'taucharts';
                 }
             },
 
+            destroy() {
+                const filters = this._currentFilters;
+                const chart = this._chart;
+                Object.keys(filters)
+                    .forEach((id) => chart.removeFilter(filters[id]));
+
+                if (this._container && this._container.parentElement) {
+                    this._clearPanel();
+                    this._container.parentElement.removeChild(this._container);
+                }
+            },
+
             onRender: function () {
                 this._clearPanel();
                 this._drawColorLegend();
@@ -333,35 +328,36 @@ import tauCharts from 'taucharts';
             },
 
             // jscs:disable maximumLineLength
-            _containerTemplate: '<div class="graphical-report__legend"></div>',
+            _containerTemplate: '<div class="tau-chart__legend"></div>',
             _template: utils.template([
-                '<div class="graphical-report__legend__wrap">',
+                '<div class="tau-chart__legend__wrap">',
                 '<%=top%>',
-                '<div class="graphical-report__legend__title"><%=name%></div>',
+                '<div class="tau-chart__legend__title"><%=name%></div>',
                 '<%=items%>',
                 '</div>'
             ].join('')),
             _itemTemplate: utils.template([
-                '<div data-scale-id=\'<%= scaleId %>\' data-dim=\'<%= dim %>\' data-value=\'<%= value %>\' class="graphical-report__legend__item graphical-report__legend__item-color <%=classDisabled%>">',
-                '   <div class="graphical-report__legend__guide__wrap">',
-                '   <div class="graphical-report__legend__guide graphical-report__legend__guide--color <%=cssClass%>"',
+                '<div data-scale-id=\'<%= scaleId %>\' data-dim=\'<%= dim %>\' data-value=\'<%= value %>\' class="tau-chart__legend__item tau-chart__legend__item-color <%=classDisabled%>">',
+                '   <div class="tau-chart__legend__guide__wrap">',
+                '   <div class="tau-chart__legend__guide tau-chart__legend__guide--color <%=cssClass%>"',
                 '        style="background-color: <%=cssColor%>; border-color: <%=borderColor%>;">',
-                '       <div class="graphical-report__legend__guide--color__overlay">',
+                '       <div class="tau-chart__legend__guide--color__overlay">',
                 '       </div>',
                 '   </div>',
                 '   </div>',
-                '   <span class="graphical-report__legend__guide__label"><%=label%></span>',
+                '   <span class="tau-chart__legend__guide__label"><%=label%></span>',
                 '</div>'
             ].join('')),
             _resetTemplate: utils.template([
-                '<div class="graphical-report__legend__reset <%=classDisabled%>">',
-                    '<div role="button" class="graphical-report-btn">Reset</div>',
+                '<div class="tau-chart__legend__reset <%=classDisabled%>">',
+                    '<div role="button" class="tau-chart__button">Reset</div>',
                 '</div>'
             ].join('')),
             // jscs:enable maximumLineLength
 
             _clearPanel: function () {
                 if (this._container) {
+                    clearTimeout(this._scrollTimeout);
                     this._getScrollContainer().removeEventListener('scroll', this._scrollListener);
                     this._container.innerHTML = '';
                 }
@@ -436,11 +432,11 @@ import tauCharts from 'taucharts';
                             .insertAdjacentHTML('beforeend', self._template({
                                 name: title,
                                 top: null,
-                                items: '<div class="graphical-report__legend__gradient-wrapper"></div>'
+                                items: '<div class="tau-chart__legend__gradient-wrapper"></div>'
                             }));
                         var container = self._container
                             .lastElementChild
-                            .querySelector('.graphical-report__legend__gradient-wrapper');
+                            .querySelector('.tau-chart__legend__gradient-wrapper');
                         var width = container.getBoundingClientRect().width;
                         var totalLabelsW = labels.reduce(function (sum, label) {
                             return (sum + getTextWidth(label));
@@ -508,9 +504,10 @@ import tauCharts from 'taucharts';
                         var stops = splitEvenly(numDomain, brewerLength)
                             .map(function (x, i) {
                                 var p = (i / (brewerLength - 1)) * 100;
-                                return (
-                                    '<stop offset="' + p + '%"' +
-                                    '      style="stop-color:' + fillScale(x) + ';stop-opacity:1" />');
+                                return xml('stop', {
+                                    offset: `${p}%`,
+                                    style: `stop-color:${fillScale(x)};stop-opacity:1"`
+                                });
                             });
 
                         var gradientId = 'legend-gradient-' + self.instanceId;
@@ -518,7 +515,7 @@ import tauCharts from 'taucharts';
                         var gradient = (
                             xml('svg',
                                 {
-                                    class: 'graphical-report__legend__gradient',
+                                    class: 'tau-chart__legend__gradient',
                                     width: layout.width,
                                     height: layout.height
                                 },
@@ -531,24 +528,24 @@ import tauCharts from 'taucharts';
                                             x2: (isVerticalLayout ? '0%' : '100%'),
                                             y2: '0%'
                                         },
-                                        stops.join('')
+                                        ...stops
                                     )
                                 ),
                                 xml('rect', {
-                                    class: 'graphical-report__legend__gradient__bar',
+                                    class: 'tau-chart__legend__gradient__bar',
                                     x: layout.barX,
                                     y: layout.barY,
                                     width: layout.barWidth,
                                     height: layout.barHeight,
                                     fill: 'url(#' + gradientId + ')'
                                 }),
-                                labels.map(function (text, i) {
+                                ...labels.map(function (text, i) {
                                     return xml('text', {
                                         x: layout.textX[i],
                                         y: layout.textY[i],
                                         'text-anchor': layout.textAnchor
                                     }, text);
-                                }).join('')
+                                })
                             )
                         );
 
@@ -630,11 +627,11 @@ import tauCharts from 'taucharts';
                             .insertAdjacentHTML('beforeend', self._template({
                                 name: title,
                                 top: null,
-                                items: '<div class="graphical-report__legend__size-wrapper"></div>'
+                                items: '<div class="tau-chart__legend__size-wrapper"></div>'
                             }));
                         var container = self._container
                             .lastElementChild
-                            .querySelector('.graphical-report__legend__size-wrapper');
+                            .querySelector('.tau-chart__legend__size-wrapper');
                         var width = container.getBoundingClientRect().width;
                         var maxLabelW = Math.max.apply(null, labels.map(getTextWidth));
                         var isVerticalLayout = false;
@@ -710,29 +707,29 @@ import tauCharts from 'taucharts';
                         var sizeLegend = (
                             xml('svg',
                                 {
-                                    class: 'graphical-report__legend__size',
+                                    class: 'tau-chart__legend__size',
                                     width: layout.width,
                                     height: layout.height
                                 },
-                                sizes.map(function (size, i) {
+                                ...sizes.map(function (size, i) {
                                     return xml('circle', {
                                         class: (
-                                            'graphical-report__legend__size__item__circle ' +
+                                            'tau-chart__legend__size__item__circle ' +
                                             (firstNode.config.color ? 'color-definite' : 'color-default-size')
                                         ),
                                         cx: layout.circleX[i],
                                         cy: layout.circleY[i],
                                         r: (size / 2)
                                     });
-                                }).join(''),
-                                labels.map(function (text, i) {
+                                }),
+                                ...labels.map(function (text, i) {
                                     return xml('text', {
-                                        class: 'graphical-report__legend__size__item__label',
+                                        class: 'tau-chart__legend__size__item__label',
                                         x: layout.textX[i],
                                         y: layout.textY[i],
                                         'text-anchor': layout.textAnchor
                                     }, text);
-                                }).join('')
+                                })
                             )
                         );
 
@@ -825,17 +822,17 @@ import tauCharts from 'taucharts';
 
                 if (self._color.length > 0) {
                     self._updateResetButtonPosition();
-                    var scrollTimeout = null;
+                    self._scrollTimeout = null;
                     self._scrollListener = function () {
                         var reset = self._container.querySelector(RESET_SELECTOR);
                         reset.style.display = 'none';
-                        if (scrollTimeout) {
-                            clearTimeout(scrollTimeout);
+                        if (self._scrollTimeout) {
+                            clearTimeout(self._scrollTimeout);
                         }
-                        scrollTimeout = setTimeout(function () {
+                        self._scrollTimeout = setTimeout(function () {
                             self._updateResetButtonPosition();
                             reset.style.display = '';
-                            scrollTimeout = null;
+                            self._scrollTimeout = null;
                         }, 250);
                     };
                     self._getScrollContainer().addEventListener('scroll', self._scrollListener);
@@ -892,7 +889,7 @@ import tauCharts from 'taucharts';
                 var isTargetHidden = (target ? isColorHidden(getColorData(target).key) : false);
 
                 var setGuideBackground = function (node, visible) {
-                    node.querySelector('.graphical-report__legend__guide')
+                    node.querySelector('.tau-chart__legend__guide')
                         .style.backgroundColor = (visible ? '' : 'transparent');
                 };
 
@@ -1003,5 +1000,6 @@ import tauCharts from 'taucharts';
         };
     }
 
-    tauCharts.api.plugins.add('legend', ChartLegend);
-}
+    Taucharts.api.plugins.add('legend', ChartLegend);
+
+export default ChartLegend;

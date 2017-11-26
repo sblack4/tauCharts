@@ -1,8 +1,6 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
 
-{
-
-    var utils = tauCharts.api.utils;
+    var utils = Taucharts.api.utils;
 
     function ChartParallelBrushing(xSettings) {
 
@@ -117,11 +115,12 @@ import tauCharts from 'taucharts';
                 });
             },
 
-            template: utils.template('<div class="graphical-report__chart_brushing_panel"></div>')
+            template: utils.template('<div class="tau-chart__chart_brushing_panel"></div>')
         };
 
         return plugin;
     }
 
-    tauCharts.api.plugins.add('parallel-brushing', ChartParallelBrushing);
-}
+    Taucharts.api.plugins.add('parallel-brushing', ChartParallelBrushing);
+
+export default ChartParallelBrushing;

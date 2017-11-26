@@ -1,6 +1,6 @@
-import tauCharts from 'taucharts';
+import Taucharts from 'taucharts';
+import * as d3 from 'd3-selection';
 
-{
     // jscs:disable
     var regressionsHub = (function () {
 
@@ -311,8 +311,7 @@ import tauCharts from 'taucharts';
         });
     }());
     // jscs:enable
-    var utils = tauCharts.api.utils;
-    var d3 = tauCharts.api.d3;
+    var utils = Taucharts.api.utils;
 
     function trendline(xSettings) {
 
@@ -426,7 +425,7 @@ import tauCharts from 'taucharts';
                     return;
                 }
 
-                var periodGenerator = tauCharts.api.tickPeriod;
+                var periodGenerator = Taucharts.api.tickPeriod;
                 var createPeriodCaster = function (period) {
                     var gen = periodGenerator.get(period, {utc: specRef.settings.utcTime});
                     return function (x) {
@@ -441,8 +440,8 @@ import tauCharts from 'taucharts';
                     var y = props.y.dim;
                     var g = props.g.dim;
 
-                    var isXPeriod = (props.x.type === 'period' && props.x.period);
-                    var isYPeriod = (props.y.type === 'period' && props.y.period);
+                    const isXPeriod = Boolean(props.x.period);
+                    const isYPeriod = Boolean(props.y.period);
 
                     var xMapper = isXPeriod ?
                         (createPeriodCaster(props.x.period)) :
@@ -530,8 +529,10 @@ import tauCharts from 'taucharts';
                         trend.guide = utils.defaults(basicGuide, trend.guide || {});
                         trend.guide.interpolate = 'linear';
                         trend.guide.showAnchors = 'never';
-                        trend.guide.cssClass      = 'graphical-report__trendline';
-                        trend.guide.widthCssClass = 'graphical-report__line-width-1';
+                        trend.guide.cssClass      = 'tau-chart__trendline';
+                        trend.guide.widthCssClass = 'tau-chart__line-width-1';
+                        trend.guide.x = trend.guide.x || {};
+                        trend.guide.x.fillGaps = false;
                         delete trend.guide.label;
                         delete trend.label;
 
@@ -540,23 +541,23 @@ import tauCharts from 'taucharts';
             },
 
             // jscs:disable maximumLineLength
-            containerTemplate: '<div class="graphical-report__trendlinepanel"></div>',
+            containerTemplate: '<div class="tau-chart__trendlinepanel"></div>',
             template: utils.template([
-                '<label class="graphical-report__trendlinepanel__title graphical-report__checkbox">',
-                '<input type="checkbox" class="graphical-report__checkbox__input i-role-show-trend" <%= showTrend %> />',
-                '<span class="graphical-report__checkbox__icon"></span>',
-                '<span class="graphical-report__checkbox__text">',
+                '<label class="tau-chart__trendlinepanel__title tau-chart__checkbox">',
+                '<input type="checkbox" class="tau-chart__checkbox__input i-role-show-trend" <%= showTrend %> />',
+                '<span class="tau-chart__checkbox__icon"></span>',
+                '<span class="tau-chart__checkbox__text">',
                 '<%= title %>',
                 '</span>',
                 '</label>',
 
                 '<div>',
-                '<select class="i-role-change-model graphical-report__select graphical-report__trendlinepanel__control">',
+                '<select class="i-role-change-model tau-chart__select tau-chart__trendlinepanel__control">',
                 '<%= models %>',
                 '</select>',
                 '</div>',
 
-                '<div class="graphical-report__trendlinepanel__error-message"><%= error %></div>'
+                '<div class="tau-chart__trendlinepanel__error-message"><%= error %></div>'
             ].join('')),
             // jscs:enable maximumLineLength
 
@@ -579,14 +580,14 @@ import tauCharts from 'taucharts';
                                 .select(this)
                                 .classed({
                                     active: isActive,
-                                    'graphical-report__line-width-1': !isActive,
-                                    'graphical-report__line-width-3': isActive
+                                    'tau-chart__line-width-1': !isActive,
+                                    'tau-chart__line-width-3': isActive
                                 });
                         };
                     };
 
                     var canv = d3.select(chart.getSVG());
-                    canv.selectAll('.graphical-report__trendline')
+                    canv.selectAll('.tau-chart__trendline')
                         .on('mouseenter', handleMouse(true))
                         .on('mouseleave', handleMouse(false));
                 }
@@ -594,5 +595,6 @@ import tauCharts from 'taucharts';
         };
     }
 
-    tauCharts.api.plugins.add('trendline', trendline);
-}
+    Taucharts.api.plugins.add('trendline', trendline);
+
+export default trendline;
